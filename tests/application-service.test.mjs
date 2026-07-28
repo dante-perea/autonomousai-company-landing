@@ -8,6 +8,10 @@ import {
   validateApplication,
 } from '../server/application-service.mjs';
 import { operatorConfigResponse } from '../server/operator-config.mjs';
+import {
+  operatorEventRequest,
+  recordOperatorEvent,
+} from '../server/operator-event.mjs';
 
 const validInput = {
   name: 'Ada Founder',
@@ -268,4 +272,68 @@ test('serves only the public PostHog configuration with canonical CORS', async (
   assert.equal(body.posthogKey, 'test-posthog-token');
   assert.equal(body.posthogHost, 'https://us.i.posthog.com');
   assert.equal(body.AGENTMAIL_API_KEY, undefined);
+});
+
+test('records only allowlisted first-party funnel events with provider acknowledgment', async () => {
+  let captured;
+  const result = await recordOperatorEvent(
+    {
+      event: 'operator_cta_click',
+      properties: {
+        route: '/galt',
+        cta_id: 'hero',
+        destination: '#apply',
+        ignored: 'not-forwarded',
+      },
+    },
+    {
+      environment,
+      distinctId: 'operator-test',
+      sessionId: 'session-test',
+    },
+    {
+      fetchImpl: async (url, options) => {
+        captured = { url, body: JSON.parse(options.body) };
+        return Response.json({ status: 1 });
+      },
+      now: () => new Date('2026-07-28T09:00:00.000Z'),
+    },
+  );
+
+  assert.deepEqual(result, { ok: true, status: 202, recorded: true });
+  assert.equal(captured.body.event, 'operator_cta_click');
+  assert.equal(captured.body.properties.distinct_id, 'operator-test');
+  assert.equal(captured.body.properties.$session_id, 'session-test');
+  assert.equal(captured.body.properties.ignored, undefined);
+});
+
+test('rejects unknown first-party events before calling the provider', async () => {
+  let calls = 0;
+  const result = await recordOperatorEvent(
+    { event: 'arbitrary_event' },
+    { environment, distinctId: 'operator-test' },
+    {
+      fetchImpl: async () => {
+        calls += 1;
+        return Response.json({ status: 1 });
+      },
+    },
+  );
+
+  assert.equal(result.status, 400);
+  assert.equal(calls, 0);
+});
+
+test('requires an allowed browser origin for the first-party event endpoint', async () => {
+  const request = new Request('https://operator.example/api/operator-event', {
+    method: 'POST',
+    headers: {
+      Origin: 'https://untrusted.example',
+      'Content-Type': 'application/json',
+      'X-PostHog-Distinct-ID': 'operator-test',
+    },
+    body: JSON.stringify({ event: 'operator_page_view' }),
+  });
+  const response = await operatorEventRequest(request, environment);
+  assert.equal(response.status, 403);
 });

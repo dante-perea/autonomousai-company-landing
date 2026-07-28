@@ -197,7 +197,8 @@ async function captureSubmission(application, applicationId, fit, metadata, envi
     }),
   });
 
-  return response.ok;
+  const body = await response.json().catch(() => ({}));
+  return response.ok && Number(body?.status) === 1;
 }
 
 export async function processApplication(input, context = {}, dependencies = {}) {

@@ -1,5 +1,3 @@
-import posthog from 'posthog-js/dist/module.no-external';
-
 const isLocal =
   window.location.hostname === 'localhost' ||
   window.location.hostname === '127.0.0.1';
@@ -11,34 +9,34 @@ const apiOrigin = configuredApiOrigin
   : '';
 const apiUrl = (path) => `${apiOrigin}${path}`;
 
-let analyticsReady = false;
-const analyticsInitialization = isLocal
-  ? Promise.resolve(false)
-  : fetch(apiUrl('/api/operator-config'), {
-      headers: { Accept: 'application/json' },
-    })
-      .then((response) => {
-        if (!response.ok) return null;
-        return response.json();
-      })
-      .then((configuration) => {
-        if (!configuration?.posthogKey || !configuration?.posthogHost) {
-          return false;
-        }
+function randomIdentifier(prefix) {
+  const value = crypto.randomUUID?.() ||
+    `${Date.now().toString(36)}_${Math.random().toString(36).slice(2)}`;
+  return `${prefix}_${value}`;
+}
 
-        posthog.init(configuration.posthogKey, {
-          api_host: configuration.posthogHost,
-          defaults: '2026-05-30',
-          autocapture: false,
-          capture_pageview: false,
-          capture_pageleave: false,
-          disable_session_recording: true,
-          person_profiles: 'identified_only',
-        });
-        analyticsReady = true;
-        return true;
-      })
-      .catch(() => false);
+function storedIdentifier(storage, key, prefix) {
+  try {
+    const existing = storage.getItem(key);
+    if (existing) return existing;
+    const created = randomIdentifier(prefix);
+    storage.setItem(key, created);
+    return created;
+  } catch {
+    return randomIdentifier(prefix);
+  }
+}
+
+const analyticsDistinctId = storedIdentifier(
+  window.localStorage,
+  'taic_operator_distinct_id',
+  'operator',
+);
+const analyticsSessionId = storedIdentifier(
+  window.sessionStorage,
+  'taic_operator_session_id',
+  'session',
+);
 
 function campaignProperties() {
   const parameters = new URLSearchParams(window.location.search);
@@ -53,27 +51,22 @@ function campaignProperties() {
 }
 
 function capture(event, properties = {}) {
+  const eventProperties = { ...campaignProperties(), ...properties };
   const testCapture = window.__TAIC_OPERATOR_TEST_CAPTURE__;
   if (typeof testCapture === 'function') {
-    testCapture(event, { ...campaignProperties(), ...properties });
+    testCapture(event, eventProperties);
   }
 
-  analyticsInitialization.then((ready) => {
-    if (ready) {
-      posthog.capture(event, { ...campaignProperties(), ...properties });
-    }
-  });
-}
-
-function captureException(error, properties = {}) {
-  analyticsInitialization.then((ready) => {
-    if (ready) {
-      posthog.captureException(error, {
-        ...campaignProperties(),
-        ...properties,
-      });
-    }
-  });
+  if (isLocal) return;
+  fetch(apiUrl('/api/operator-event'), {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...analyticsHeaders(),
+    },
+    body: JSON.stringify({ event, properties: eventProperties }),
+    keepalive: true,
+  }).catch(() => {});
 }
 
 capture('operator_page_view', {
@@ -214,14 +207,10 @@ function applicationPayload(formData) {
 }
 
 function analyticsHeaders() {
-  if (!analyticsReady) return {};
-
-  const headers = {
-    'X-PostHog-Distinct-ID': posthog.get_distinct_id(),
+  return {
+    'X-PostHog-Distinct-ID': analyticsDistinctId,
+    'X-PostHog-Session-ID': analyticsSessionId,
   };
-  const sessionId = posthog.get_session_id?.();
-  if (sessionId) headers['X-PostHog-Session-ID'] = sessionId;
-  return headers;
 }
 
 form?.addEventListener('submit', async (event) => {
@@ -276,7 +265,6 @@ form?.addEventListener('submit', async (event) => {
     );
     submitLabel.textContent = 'Application delivered';
   } catch (error) {
-    captureException(error, { boundary: 'operator_application_form' });
     showFormStatus(
       `${error.message} Please email galt@autonomousai.company if the problem continues.`,
       'error',

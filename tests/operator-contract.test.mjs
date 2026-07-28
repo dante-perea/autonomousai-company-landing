@@ -73,14 +73,19 @@ test('ships a five-minute proof with input, output, gate and receipts', async ()
 test('defines the three requested funnel events and a server-confirmed conversion', async () => {
   const browser = await text('public/galt/operator.js');
   const server = await text('server/application-service.mjs');
+  const eventServer = await text('server/operator-event.mjs');
 
   assert.match(browser, /capture\('operator_page_view'/);
   assert.match(browser, /capture\('operator_cta_click'/);
   assert.match(browser, /capture\('operator_application_submitted'/);
+  assert.match(browser, /\/api\/operator-event/);
   assert.match(browser, /X-PostHog-Distinct-ID/);
   assert.match(server, /event: 'operator_application_submitted'/);
   assert.match(server, /capture_source: 'application_api'/);
   assert.match(server, /notificationReceipt/);
+  assert.match(eventServer, /operator_page_view/);
+  assert.match(eventServer, /operator_cta_click/);
+  assert.match(eventServer, /Number\(body\?\.status\) !== 1/);
 });
 
 test('uses the operator subdomain as canonical and redirects both entry paths', async () => {

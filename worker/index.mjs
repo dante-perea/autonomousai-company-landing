@@ -1,5 +1,6 @@
 import { applicationRequest } from '../server/application-service.mjs';
 import { preflightResponse } from '../server/cors.mjs';
+import { operatorEventRequest } from '../server/operator-event.mjs';
 import { operatorConfigResponse } from '../server/operator-config.mjs';
 
 const worker = {
@@ -8,6 +9,10 @@ const worker = {
 
     if (url.pathname === '/api/application') {
       return applicationRequest(request, environment);
+    }
+
+    if (url.pathname === '/api/operator-event') {
+      return operatorEventRequest(request, environment);
     }
 
     if (url.pathname === '/api/operator-config') {
