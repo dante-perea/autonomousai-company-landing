@@ -8,6 +8,10 @@
   --foundry-titanium-dark: oklch(0.54 0.008 83);
   --foundry-amber: oklch(0.55 0.14 287);
   --foundry-amber-hot: oklch(0.79 0.16 70);
+  --evolution-field-x: 80%;
+  --evolution-field-y: 52%;
+  --evolution-field-opacity: 0.48;
+  --mobile-cinema-horizon: 60%;
   --foundry-line: rgb(22 24 23 / 18%);
   --foundry-line-strong: rgb(22 24 23 / 38%);
   --foundry-gutter: clamp(1rem, 4vw, 5rem);
@@ -19,27 +23,52 @@
 }
 
 html[data-active-beat="intention"] {
-  --foundry-amber: oklch(0.55 0.14 287);
+  /* Entropy: unresolved possibility, held in a deep spectral violet. */
+  --foundry-amber: oklch(0.48 0.145 292);
+  --evolution-field-x: 84%;
+  --evolution-field-y: 57%;
+  --evolution-field-opacity: 0.44;
 }
 
 html[data-active-beat="execution"] {
-  --foundry-amber: oklch(0.49 0.055 248);
+  /* Atoms: cool ion blue as probability settles into stable structure. */
+  --foundry-amber: oklch(0.45 0.08 248);
+  --evolution-field-x: 77%;
+  --evolution-field-y: 48%;
+  --evolution-field-opacity: 0.5;
 }
 
 html[data-active-beat="verification"] {
-  --foundry-amber: oklch(0.55 0.115 225);
+  /* DNA: mineral blue marks copying, pairing and error correction. */
+  --foundry-amber: oklch(0.46 0.1 210);
+  --evolution-field-x: 81%;
+  --evolution-field-y: 53%;
+  --evolution-field-opacity: 0.54;
 }
 
 html[data-active-beat="frontiers"] {
-  --foundry-amber: oklch(0.53 0.105 184);
+  /* Intelligence: teal appears when prediction closes against feedback. */
+  --foundry-amber: oklch(0.44 0.105 174);
+  --evolution-field-x: 84%;
+  --evolution-field-y: 46%;
+  --evolution-field-opacity: 0.58;
 }
 
 html[data-active-beat="scale"] {
-  --foundry-amber: oklch(0.53 0.055 76);
+  /* Autonomy: a quiet mineral neutral holds the nested operating loops. */
+  --foundry-amber: oklch(0.41 0.035 90);
+  --evolution-field-x: 79%;
+  --evolution-field-y: 51%;
+  --evolution-field-opacity: 0.46;
 }
 
 html[data-active-beat="judgement"] {
-  --foundry-amber: oklch(0.66 0.16 54);
+  /* Founder boundary: the only warm, irreversible state in the film. */
+  --foundry-amber: oklch(0.47 0.145 52);
+  --foundry-amber-hot: oklch(0.72 0.16 66);
+  --evolution-field-x: 76%;
+  --evolution-field-y: 52%;
+  --evolution-field-opacity: 0.68;
 }
 
 html {
@@ -594,28 +623,44 @@ html[data-foundry-ready="true"]:not([data-motion="reduced"]) .foundry-atmosphere
 
 .foundry-atmosphere__titanium {
   background:
-    linear-gradient(104deg, transparent 0 56%, rgb(255 255 255 / 22%) 58%, transparent 61%),
-    repeating-linear-gradient(
-      0deg,
-      rgb(22 24 23 / 0%) 0,
-      rgb(22 24 23 / 0%) 2px,
-      rgb(22 24 23 / 2.8%) 3px,
-      rgb(255 255 255 / 2.6%) 4px
+    radial-gradient(
+      ellipse 32% 58% at var(--evolution-field-x) var(--evolution-field-y),
+      color-mix(in oklch, var(--foundry-amber) 8%, transparent),
+      transparent 72%
+    ),
+    linear-gradient(
+      112deg,
+      transparent 0 54%,
+      rgb(255 255 255 / 24%) 58%,
+      transparent 64%
     );
-  mix-blend-mode: multiply;
-  opacity: 0.62;
+  mix-blend-mode: soft-light;
+  opacity: 0.74;
 }
 
 .foundry-atmosphere__heat {
-  inset: -15%;
+  inset: -10%;
   background:
-    radial-gradient(circle at 78% 56%, color-mix(in oklch, var(--foundry-amber) 24%, transparent), transparent 8%),
-    radial-gradient(circle at 78% 56%, color-mix(in oklch, var(--foundry-amber) 12%, transparent), transparent 26%),
-    radial-gradient(circle at 73% 47%, rgb(255 255 255 / 28%), transparent 37%);
-  opacity: calc(0.46 + (var(--foundry-progress) * 0.32));
+    radial-gradient(
+      ellipse 12% 24% at var(--evolution-field-x) var(--evolution-field-y),
+      color-mix(in oklch, var(--foundry-amber) 22%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      ellipse 38% 56% at var(--evolution-field-x) var(--evolution-field-y),
+      color-mix(in oklch, var(--foundry-amber) 10%, transparent),
+      transparent 76%
+    ),
+    linear-gradient(
+      116deg,
+      transparent 34%,
+      rgb(255 255 255 / 20%) 54%,
+      transparent 69%
+    );
+  opacity: calc(var(--evolution-field-opacity) + (var(--foundry-progress) * 0.08));
   transform: translate3d(
-    calc((var(--foundry-progress) - 0.5) * -3%),
-    calc((var(--foundry-progress) - 0.5) * 2%),
+    calc((var(--foundry-progress) - 0.5) * -1.8%),
+    calc((var(--foundry-progress) - 0.5) * 1.2%),
     0
   );
 }
@@ -635,15 +680,24 @@ html[data-foundry-ready="true"]:not([data-motion="reduced"]) .foundry-atmosphere
     23px 29px,
     31px 37px;
   mix-blend-mode: multiply;
-  opacity: 0.1;
-  animation: foundry-grain 360ms steps(2, jump-none) infinite;
+  opacity: 0.075;
+  animation: foundry-grain 780ms steps(2, jump-none) infinite;
 }
 
 .foundry-atmosphere__vignette {
   background:
-    linear-gradient(90deg, rgb(22 24 23 / 5%), transparent 18% 78%, rgb(22 24 23 / 8%)),
-    linear-gradient(0deg, rgb(22 24 23 / 8%), transparent 20% 82%, rgb(255 255 255 / 9%));
-  box-shadow: inset 0 0 12rem rgb(22 24 23 / 5%);
+    radial-gradient(
+      ellipse 88% 112% at 76% 51%,
+      transparent 44%,
+      rgb(22 24 23 / 4.5%) 100%
+    ),
+    linear-gradient(
+      90deg,
+      rgb(22 24 23 / 2.5%),
+      transparent 20% 82%,
+      rgb(22 24 23 / 5%)
+    );
+  box-shadow: inset 0 0 10rem rgb(22 24 23 / 3%);
 }
 
 .foundry-atmosphere::after {
@@ -705,9 +759,12 @@ html[data-foundry-ready="true"]:not([data-motion="reduced"]) .foundry-proof-line
   background: linear-gradient(
     to bottom,
     transparent,
-    var(--foundry-titanium-dark) 9% 88%,
+    color-mix(in oklch, var(--foundry-amber) 20%, transparent) 10%,
+    color-mix(in oklch, var(--foundry-amber) 66%, var(--foundry-titanium-dark)) 50%,
+    color-mix(in oklch, var(--foundry-amber) 20%, transparent) 90%,
     transparent
   );
+  opacity: 0.72;
 }
 
 .foundry-proof-line__flare {
@@ -719,12 +776,12 @@ html[data-foundry-ready="true"]:not([data-motion="reduced"]) .foundry-proof-line
   background: linear-gradient(
     to bottom,
     transparent,
-    rgb(255 173 56 / 16%),
-    rgb(214 111 22 / 72%),
-    rgb(255 173 56 / 16%),
+    color-mix(in oklch, var(--foundry-amber) 14%, transparent),
+    color-mix(in oklch, var(--foundry-amber) 74%, transparent),
+    color-mix(in oklch, var(--foundry-amber) 14%, transparent),
     transparent
   );
-  filter: blur(4px);
+  filter: blur(3px);
   opacity: calc(0.18 + var(--beat-progress) * 0.44);
   transform: translate(-50%, -50%);
 }
@@ -994,6 +1051,28 @@ html[data-renderer="fallback"] .foundry-beat * {
     --foundry-header-height: 4.4rem;
     --foundry-gutter: clamp(0.85rem, 4.5vw, 1.5rem);
     --proof-x: 82%;
+    --mobile-cinema-horizon: 61%;
+  }
+
+  html[data-active-beat="intention"] {
+    --mobile-cinema-horizon: 62%;
+  }
+
+  html[data-active-beat="execution"] {
+    --mobile-cinema-horizon: 61%;
+  }
+
+  html[data-active-beat="verification"],
+  html[data-active-beat="frontiers"] {
+    --mobile-cinema-horizon: 66%;
+  }
+
+  html[data-active-beat="scale"] {
+    --mobile-cinema-horizon: 63%;
+  }
+
+  html[data-active-beat="judgement"] {
+    --mobile-cinema-horizon: 58%;
   }
 
   .foundry-header {
@@ -1203,12 +1282,36 @@ html[data-renderer="fallback"] .foundry-beat * {
   }
 
   .foundry-atmosphere::after {
-    background: radial-gradient(
-      ellipse 125% 78% at 0 42%,
-      oklch(0.925 0.012 83 / 0.97) 0 48%,
-      oklch(0.925 0.012 83 / 0.72) 62%,
-      transparent 82%
-    );
+    background:
+      linear-gradient(
+        to bottom,
+        transparent calc(var(--mobile-cinema-horizon) - 1px),
+        color-mix(in oklch, var(--foundry-amber) 28%, transparent)
+          var(--mobile-cinema-horizon),
+        transparent calc(var(--mobile-cinema-horizon) + 1px)
+      ),
+      linear-gradient(
+        to bottom,
+        oklch(0.925 0.012 83 / 0.995) 0%,
+        oklch(0.925 0.012 83 / 0.985)
+          calc(var(--mobile-cinema-horizon) - 14%),
+        oklch(0.925 0.012 83 / 0.86)
+          calc(var(--mobile-cinema-horizon) - 7%),
+        oklch(0.925 0.012 83 / 0.34)
+          calc(var(--mobile-cinema-horizon) + 2%),
+        oklch(0.925 0.012 83 / 0.08)
+          calc(var(--mobile-cinema-horizon) + 9%),
+        transparent calc(var(--mobile-cinema-horizon) + 15%)
+      );
+  }
+
+  html[data-foundry-ready="true"]:not([data-motion="reduced"]) .foundry-proof-line {
+    top: calc(var(--mobile-cinema-horizon) + 0.85rem);
+    bottom: 3.7rem;
+    left: auto;
+    right: var(--foundry-gutter);
+    opacity: var(--proof-opacity);
+    transform: none;
   }
 
   html[data-foundry-ready="true"]:not([data-motion="reduced"]) .foundry-core-label {
@@ -1234,11 +1337,39 @@ html[data-renderer="fallback"] .foundry-beat * {
 @media (max-width: 380px) {
   :root {
     --foundry-gutter: 0.8rem;
+    --mobile-cinema-horizon: 66%;
+  }
+
+  html[data-active-beat] {
+    --mobile-cinema-horizon: 66%;
+  }
+
+  html[data-active-beat="verification"],
+  html[data-active-beat="frontiers"] {
+    --mobile-cinema-horizon: 69%;
+  }
+
+  html[data-active-beat="judgement"] {
+    --mobile-cinema-horizon: 61%;
+  }
+
+  .foundry-header {
+    column-gap: 0.35rem;
+  }
+
+  .foundry-lockup img {
+    width: 2.1rem;
+    margin-right: 0.35rem;
   }
 
   .foundry-lockup span {
+    font-size: 0.47rem;
+    letter-spacing: 0.035em;
+  }
+
+  .foundry-thesis-link--header {
+    gap: 0.25rem;
     font-size: 0.53rem;
-    letter-spacing: 0.055em;
   }
 
   .foundry-beat h1,

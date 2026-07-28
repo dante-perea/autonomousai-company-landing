@@ -30,28 +30,30 @@ Provocative, rigorous, accountable. The voice is founder-owned and intellectuall
 2. Preserve the user's causal argument and sequence: value creation, collapsing intention-to-output cost, applications, research, TAIC, founder judgment, valuable loops.
 3. Make verification the visual and conceptual spine. Distinguish execution from validation and applications from research.
 4. Keep the founder present. Execution may be delegated; purpose, boundaries, judgment, and accountability remain human.
-5. Preserve the GPU-rendered world as a signature visual. Present it truthfully as a locally rendered metaphor, never as model inference or evidence of value.
+5. Preserve the GPU-rendered world as a signature visual. Present the entropy-to-AI sequence truthfully as a metaphor for increasing organized agency, never as scientific inevitability, model inference, or evidence of value.
 6. Keep the landing page concise. Supporting arguments, sources, and full prose belong in the whitepaper.
-7. Tell the landing in six concise beats: intention, execution, verification, applications and research, company to CRO to lab, and founder judgement.
-8. Use motion to explain the thesis. The persistent intent core must be transformed, tested, routed, scaled, and finally handed back to the founder boundary.
+7. Keep the thesis in six concise semantic beats: intention, execution, verification, applications and research, company to CRO to lab, and founder judgement. Give those beats a continuous visual arc: entropy, atoms, DNA, intelligence, autonomous AI, and human judgement.
+8. Use motion to explain the thesis. One persistent signal must acquire structure, become inheritable, pass through an explicitly engineered intelligence hinge, close verification loops, and finally stop at the founder boundary.
 9. Keep the company name in one horizontal header lockup at every supported viewport.
 
 ## Motion Language
 
-The landing is one continuous foundry, not a collection of effects. A single intent core enters an execution corridor, crosses a physical verification instrument, splits into applications and research proof channels, assembles nested company, contract research organization, and lab structures, then reaches the founder boundary. Warm amber is reserved for founder judgement and irreversible accountability.
+The landing is one continuous material evolution, not a collection of effects. A single seeded particle population and one persistent phase trace move through six reversible states: entropy, atoms, DNA, engineered intelligence, autonomous proof loops, and the founder boundary. Each state grows physically from the last. Warm amber is reserved for founder judgement and irreversible accountability.
 
-- Ultraviolet represents intention and unverified possibility.
-- Cool white represents execution and measurement.
+- Ultraviolet represents unresolved possibility and the persistent signal.
+- Titanium and cool white represent stable structure, computation, and measurement.
 - Teal appears when output has crossed verification and become value.
 - Blue represents the slower research-verification frontier.
 - Amber represents the founder's irreversible accountability boundary.
+- AI appears as prediction, measured error, and correction. Do not use a brain, humanoid, chip, or code rain.
+- The final signal stops at the boundary. It never crosses through automation alone.
 - Scroll is native and reversible. The site must not hijack scrolling or require snap points.
 - Silence is the default. Do not add autoplay audio or browser-generated effects.
 - Reduced motion is a designed static composition, not hidden content with zero-duration transitions.
 
 ## Motion Architecture
 
-GSAP ScrollTrigger is the sole narrative clock. It writes one normalized journey state consumed by both the semantic DOM choreography and a single Three.js world. Lenis only smooths eligible fine-pointer input; it never owns narrative state. One renderer, one camera, and one persistent intent core live for the complete journey. Every authored transform is a pure function of normalized progress, so the film is exactly reversible.
+GSAP ScrollTrigger is the sole narrative clock. It writes one normalized journey state consumed by both the semantic DOM choreography and a single Three.js world. Lenis only smooths eligible fine-pointer input; it never owns narrative state. One renderer, one camera, one seeded population, and one persistent phase trace live for the complete journey. Every authored transform is a pure function of normalized progress, so the film is exactly reversible.
 
 WebGL2 is preferred and WebGL1 remains compatible. Quality is adaptive and preserves composition and edge fidelity before reducing secondary particles or instance counts. Continuous rendering stops when the page is hidden, changes live with the user's reduced-motion preference, and recovers explicitly after context restoration. A renderer failure must never hide or block the semantic thesis.
 

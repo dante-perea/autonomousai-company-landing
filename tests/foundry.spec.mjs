@@ -36,6 +36,16 @@ async function readFoundrySnapshot(page) {
         : cameraPosition && typeof cameraPosition === 'object'
           ? [cameraPosition.x, cameraPosition.y, cameraPosition.z].map(Number)
           : null;
+    const corePosition =
+      snapshot.core?.worldPosition ??
+      snapshot.coreWorldPosition ??
+      snapshot.core?.position;
+    const core =
+      Array.isArray(corePosition) || ArrayBuffer.isView(corePosition)
+        ? Array.from(corePosition).slice(0, 3).map(Number)
+        : corePosition && typeof corePosition === 'object'
+          ? [corePosition.x, corePosition.y, corePosition.z].map(Number)
+          : null;
 
     return {
       progress: Number(
@@ -62,7 +72,13 @@ async function readFoundrySnapshot(page) {
         snapshot.beat?.id ??
         snapshot.beat?.name ??
         null,
+      storyStage:
+        snapshot.storyStage ??
+        snapshot.stage ??
+        snapshot.story?.stage ??
+        null,
       camera,
+      core,
       rendererCount: Number(
         snapshot.rendererCount ??
           snapshot.renderers?.length ??
@@ -226,6 +242,50 @@ test.describe('Autonomous Foundry production contract', () => {
     );
   });
 
+  test('finishes the opening cleanly when the visitor scrolls immediately', async ({
+    page,
+  }) => {
+    await page.goto('/');
+    await waitForFoundry(page);
+
+    await page.evaluate(() => window.__TAIC_FOUNDRY__.seek(0.52, true));
+    await page.waitForTimeout(120);
+
+    const headerState = await page.locator('.foundry-header').evaluate((header) =>
+      [...header.children].map((child) => {
+        const style = getComputedStyle(child);
+        return {
+          opacity: Number(style.opacity),
+          transform: style.transform,
+          visibility: style.visibility,
+        };
+      }),
+    );
+
+    for (const item of headerState) {
+      expect(item.opacity).toBeCloseTo(1, 2);
+      expect(item.visibility).toBe('visible');
+      expect(item.transform === 'none' || item.transform.includes('0, 0')).toBe(true);
+    }
+  });
+
+  test('destroy is terminal even if motion preferences change afterward', async ({
+    page,
+  }) => {
+    await page.goto('/');
+    await waitForFoundry(page);
+
+    const rendererId = (await readFoundrySnapshot(page)).rendererId;
+    await page.evaluate(() => window.__TAIC_FOUNDRY__.destroy());
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.waitForTimeout(180);
+
+    const after = await page.evaluate(() => window.__TAIC_FOUNDRY__.getSnapshot());
+    expect(after.ready).toBe(false);
+    expect(after.renderState).toBe('disposed');
+    expect(after.rendererId).not.toBe(rendererId);
+  });
+
   test('reports normalized, reversible progress while preserving the core identity', async ({
     page,
   }) => {
@@ -322,6 +382,50 @@ test.describe('Autonomous Foundry production contract', () => {
     }
 
     expect(visited).toEqual([0, 1, 2, 3, 4, 5]);
+  });
+
+  test('evolves one continuous story from entropy to accountable agency', async ({
+    page,
+  }) => {
+    await page.goto('/');
+    await waitForFoundry(page);
+
+    const samples = [
+      [0.04, 'entropy'],
+      [0.17, 'atoms'],
+      [0.34, 'dna'],
+      [0.52, 'intelligence'],
+      [0.7, 'autonomous-company'],
+      [0.92, 'founder-boundary'],
+    ];
+    const visitedStages = [];
+
+    for (const [progress, expectedStage] of samples) {
+      const snapshot = await scrollToDocumentProgress(page, progress);
+      visitedStages.push(snapshot.storyStage);
+      expect(snapshot.storyStage).toBe(expectedStage);
+    }
+
+    expect(visitedStages).toEqual(samples.map(([, stage]) => stage));
+  });
+
+  test('keeps the camera and persistent signal continuous across every story hinge', async ({
+    page,
+  }) => {
+    await page.goto('/');
+    await waitForFoundry(page);
+
+    for (const boundary of [0.105, 0.275, 0.425, 0.625, 0.81]) {
+      const before = await scrollToDocumentProgress(page, boundary - 0.0015);
+      const after = await scrollToDocumentProgress(page, boundary + 0.0015);
+
+      expect(before.camera).toHaveLength(3);
+      expect(after.camera).toHaveLength(3);
+      expect(before.core).toHaveLength(3);
+      expect(after.core).toHaveLength(3);
+      expect(cameraDistance(before.camera, after.camera)).toBeLessThan(3);
+      expect(cameraDistance(before.core, after.core)).toBeLessThan(3);
+    }
   });
 
   test('has no horizontal overflow at phone and desktop widths', async ({ page }) => {
