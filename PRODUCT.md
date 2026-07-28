@@ -33,20 +33,21 @@ Provocative, rigorous, accountable. The voice is founder-owned and intellectuall
 5. Preserve the GPU-rendered world as a signature visual. Present the entropy-to-AI sequence truthfully as a metaphor for increasing organized agency, never as scientific inevitability, model inference, or evidence of value.
 6. Keep the landing page concise. Supporting arguments, sources, and full prose belong in the whitepaper.
 7. Keep the thesis in six concise semantic beats: intention, execution, verification, applications and research, company to CRO to lab, and founder judgement. Give those beats a continuous visual arc: entropy, atoms, DNA, intelligence, autonomous AI, and human judgement.
-8. Use motion to explain the thesis. One persistent signal must acquire structure, become inheritable, pass through an explicitly engineered intelligence hinge, close verification loops, and finally stop at the founder boundary.
+8. Use motion to explain the thesis. One persistent signal must acquire structure, become inheritable, pass through an explicitly engineered intelligence hinge, close verification loops, and finally settle in the chest of a human witness.
 9. Keep the company name in one horizontal header lockup at every supported viewport.
 
 ## Motion Language
 
-The landing is one continuous material evolution, not a collection of effects. A single seeded particle population and one persistent phase trace move through six reversible states: entropy, atoms, DNA, engineered intelligence, autonomous proof loops, and the founder boundary. Each state grows physically from the last. Warm amber is reserved for founder judgement and irreversible accountability.
+The landing is one continuous material evolution, not a collection of effects. A single seeded particle population and one persistent phase trace move through six reversible states: entropy, atoms, DNA, engineered intelligence, autonomous proof loops, and the human witness. Each state grows physically from the last. At the end, the proof loops become a faint cosmic reference field while their material resolves into an upright human form. Warm amber is reserved for the chest signal that represents founder judgement and irreversible accountability.
 
 - Ultraviolet represents unresolved possibility and the persistent signal.
 - Titanium and cool white represent stable structure, computation, and measurement.
 - Teal appears when output has crossed verification and become value.
 - Blue represents the slower research-verification frontier.
 - Amber represents the founder's irreversible accountability boundary.
-- AI appears as prediction, measured error, and correction. Do not use a brain, humanoid, chip, or code rain.
-- The final signal stops at the boundary. It never crosses through automation alone.
+- AI appears as prediction, measured error, and correction. Do not give the engineered-intelligence state a human body, brain, chip, or code rain. The human form belongs only to the final accountability state.
+- The final signal settles at the human chest. Automation converges on the person who chooses the outcome, establishes the boundary, and remains accountable.
+- The conclusion is intentionally anthropocentric: the cosmos is composed around the human point of view. This is declared art direction, not a claim that physical or biological evolution inevitably culminates in humanity.
 - Scroll is native and reversible. The site must not hijack scrolling or require snap points.
 - Silence is the default. Do not add autoplay audio or browser-generated effects.
 - Reduced motion is a designed static composition, not hidden content with zero-duration transitions.
