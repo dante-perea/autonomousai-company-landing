@@ -1,114 +1,248 @@
 import { expect, test } from '@playwright/test';
 
-test('presents a succinct company overview derived from the thesis', async ({ page }) => {
-  await page.goto('/');
+const VIEWPORTS = [
+  { width: 320, height: 720 },
+  { width: 360, height: 800 },
+  { width: 393, height: 852 },
+  { width: 768, height: 900 },
+  { width: 1024, height: 768 },
+  { width: 1440, height: 900 },
+  { width: 1728, height: 995 },
+];
+
+async function waitForFoundry(page) {
+  await expect
+    .poll(
+      () =>
+        page.evaluate(
+          () => {
+            if (typeof window.__TAIC_FOUNDRY__?.getSnapshot !== 'function') {
+              return false;
+            }
+            return window.__TAIC_FOUNDRY__.getSnapshot().renderState !== 'loading';
+          },
+        ),
+      { timeout: 20_000 },
+    )
+    .toBe(true);
+}
+
+async function abortExternalFonts(page) {
+  await page.route('https://fonts.googleapis.com/**', (route) => route.abort());
+  await page.route('https://fonts.gstatic.com/**', (route) => route.abort());
+}
+
+async function disableWebGL(page) {
+  await page.addInitScript(() => {
+    const originalGetContext = HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.getContext = function getContext(type, ...arguments_) {
+      if (/^(webgl2?|experimental-webgl)$/i.test(String(type))) {
+        return null;
+      }
+      return originalGetContext.call(this, type, ...arguments_);
+    };
+  });
+}
+
+async function preferLowPowerRenderer(page) {
+  await page.addInitScript(() => {
+    try {
+      Object.defineProperty(navigator, 'connection', {
+        configurable: true,
+        value: { saveData: true },
+      });
+    } catch {
+      // The runtime still selects a compact quality tier on constrained browsers.
+    }
+  });
+}
+
+test('presents the succinct thesis as six semantic beats and a complete whitepaper path', async ({
+  page,
+}) => {
+  await abortExternalFonts(page);
+  await disableWebGL(page);
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
+  await waitForFoundry(page);
 
   await expect(page).toHaveTitle(/The Autonomous AI Company/);
-  await expect(
-    page.getByRole('heading', {
-      level: 1,
-      name: /from companies with fewer people.*one-person companies.*zero standing employees/i,
-    }),
-  ).toBeVisible();
-  await expect(page.getByText(/Not because people lack value/i)).toBeVisible();
-  await expect(page.getByRole('link', { name: /founding thesis/i }).first()).toHaveAttribute(
-    'href',
-    './thesis/',
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(
+    /Zero standing\s+employees\./i,
   );
-  await expect(page.getByRole('heading', { name: 'Software has been solved.' })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Verification is next.' })).toBeVisible();
-  await expect(page.getByText(/Zero people is the direction.*Value creation is the objective/i)).toBeVisible();
-  await expect(page.getByText(/Everything delegated/i)).toBeVisible();
-  await expect(page.getByText(/Except judgement/i)).toBeVisible();
+  const openingLede = page.locator('#intention .foundry-beat__lede');
+  await expect(openingLede).toBeVisible();
+  await expect(openingLede).toContainText(/Not because people lack value/i);
+  await expect(openingLede).toContainText(
+    /Work has always been a proxy for value creation/i,
+  );
+
+  const beatContract = await page.locator('[data-beat]').evaluateAll((beats) =>
+    beats.map((beat) => {
+      const heading = beat.querySelector('h1, h2');
+      return {
+        id: beat.id,
+        index: Number(beat.dataset.beatIndex),
+        name: beat.dataset.beatName,
+        labelledBy: beat.getAttribute('aria-labelledby'),
+        headingId: heading?.id ?? null,
+        heading: heading?.textContent?.replace(/\s+/g, ' ').trim() ?? '',
+      };
+    }),
+  );
+
+  expect(beatContract).toEqual([
+    {
+      id: 'intention',
+      index: 0,
+      name: 'intention',
+      labelledBy: 'intention-title',
+      headingId: 'intention-title',
+      heading: 'Zero standing employees.',
+    },
+    {
+      id: 'execution',
+      index: 1,
+      name: 'execution',
+      labelledBy: 'execution-title',
+      headingId: 'execution-title',
+      heading: 'The cost of turning intention into output is collapsing.',
+    },
+    {
+      id: 'verification',
+      index: 2,
+      name: 'verification',
+      labelledBy: 'verification-title',
+      headingId: 'verification-title',
+      heading: 'Execution creates output. Verification turns it into value.',
+    },
+    {
+      id: 'frontiers',
+      index: 3,
+      name: 'frontiers',
+      labelledBy: 'frontiers-title',
+      headingId: 'frontiers-title',
+      heading: 'Same loop. Different cost of proof.',
+    },
+    {
+      id: 'scale',
+      index: 4,
+      name: 'scale',
+      labelledBy: 'scale-title',
+      headingId: 'scale-title',
+      heading: 'Company. CRO. Lab.',
+    },
+    {
+      id: 'judgement',
+      index: 5,
+      name: 'judgement',
+      labelledBy: 'judgement-title',
+      headingId: 'judgement-title',
+      heading: 'Everything delegated. Except judgement.',
+    },
+  ]);
+
+  await expect(page.locator('#frontiers')).toContainText('Software has been solved.');
+  await expect(page.locator('#frontiers')).toContainText('Verification is next.');
+  await expect(page.locator('#scale')).toContainText('Zero-people company');
+  await expect(page.locator('#scale')).toContainText('Zero-people CRO');
+  await expect(page.locator('#scale')).toContainText('Zero-people lab');
+  await expect(page.locator('#judgement')).toContainText(
+    /remains accountable for irreversible decisions/i,
+  );
+
+  const whitepaperLinks = page.locator('a[href="./thesis/"]');
+  await expect(whitepaperLinks).toHaveCount(2);
+  const headerWhitepaper = page.locator('.foundry-thesis-link--header');
+  await expect(headerWhitepaper).toBeVisible();
+  await expect(headerWhitepaper.locator('.foundry-thesis-link__long')).toHaveText(
+    'Founding whitepaper',
+  );
+  await expect(
+    page.getByRole('link', {
+      name: 'Read the founding whitepaper',
+      exact: true,
+    }),
+  ).toBeAttached();
 });
 
-test('keeps the brand lockup on one horizontal line', async ({ page }) => {
-  for (const viewport of [
-    { width: 320, height: 720 },
-    { width: 360, height: 800 },
-    { width: 393, height: 852 },
-    { width: 768, height: 900 },
-    { width: 1024, height: 768 },
-    { width: 1440, height: 900 },
-    { width: 1728, height: 995 },
-  ]) {
-    await page.setViewportSize(viewport);
+test('publishes the complete founder thesis as a dedicated readable document', async ({
+  page,
+}) => {
+  await abortExternalFonts(page);
+  await page.goto('/thesis/', { waitUntil: 'domcontentloaded' });
 
-    for (const path of ['/', '/thesis/']) {
-      await page.goto(path);
-      const lockup = await page.locator('.brand__name').evaluate((element) => {
-        const styles = getComputedStyle(element);
-        const bounds = element.getBoundingClientRect();
+  await expect(page.locator('script[src*="site.js"]')).toHaveCount(0);
+  await expect(
+    page.getByRole('heading', { level: 1, name: 'The Autonomous AI Company' }),
+  ).toBeVisible();
+  await expect(page.locator('#value')).toContainText(
+    /work has always been a proxy for value creation/i,
+  );
+  await expect(page.locator('#research')).toContainText(
+    /Capital converts into scientific progress/i,
+  );
+  await expect(
+    page.locator('#company'),
+  ).toContainText(/Zero people describes the direction, not the objective/i);
+  await expect(
+    page.locator('#company'),
+  ).toContainText(/remain accountable for irreversible decisions/i);
+  await expect(
+    page.getByRole('heading', { name: /Which valuable loops can we close first/i }),
+  ).toBeVisible();
+  await expect(page.locator('#sources li')).toHaveCount(6);
+  await expect(
+    page.getByRole('link', { name: /Back to the company/i }).first(),
+  ).toBeVisible();
+});
+
+test('keeps both header lockups on one line at every supported width', async ({ page }) => {
+  test.setTimeout(60_000);
+  await abortExternalFonts(page);
+  await disableWebGL(page);
+
+  for (const target of [
+    { path: '/', selector: '.foundry-header .foundry-lockup > span' },
+    { path: '/thesis/', selector: '.site-header .brand__name' },
+  ]) {
+    await page.setViewportSize(VIEWPORTS[0]);
+    await page.goto(target.path, { waitUntil: 'domcontentloaded' });
+
+    for (const viewport of VIEWPORTS) {
+      await page.setViewportSize(viewport);
+      const lockup = page.locator(target.selector);
+      await expect(lockup).toHaveText('The Autonomous AI Company');
+
+      const metrics = await lockup.evaluate((element) => {
+        const style = getComputedStyle(element);
+        const range = document.createRange();
+        range.selectNodeContents(element);
+        const textLines = [...range.getClientRects()].filter(
+          (rectangle) => rectangle.width > 0 && rectangle.height > 0,
+        );
         return {
-          height: bounds.height,
-          lineHeight: Number.parseFloat(styles.lineHeight),
-          whiteSpace: styles.whiteSpace,
+          whiteSpace: style.whiteSpace,
+          textLines: textLines.length,
+          documentWidth: document.documentElement.scrollWidth,
+          viewportWidth: document.documentElement.clientWidth,
         };
       });
 
-      expect(lockup.whiteSpace).toBe('nowrap');
-      expect(lockup.height).toBeLessThanOrEqual(lockup.lineHeight * 1.15);
+      expect(metrics.whiteSpace).toBe('nowrap');
+      expect(metrics.textLines).toBe(1);
+      expect(metrics.documentWidth).toBeLessThanOrEqual(metrics.viewportWidth + 1);
     }
   }
 });
 
-test('composes the landing as four concise chapters with a dedicated accountability climax', async ({ page }) => {
-  await page.setViewportSize({ width: 1728, height: 995 });
-  await page.goto('/');
-
-  const screens = await page.locator('main > section').evaluateAll((sections) =>
-    sections.map((section) => ({
-      id: section.id,
-      height: section.getBoundingClientRect().height,
-    })),
-  );
-
-  expect(screens.map((screen) => screen.id)).toEqual(['top', 'model', 'frontiers', 'company']);
-  for (const screen of screens.slice(0, 3)) {
-    expect(screen.height, `${screen.id} should read as one screen`).toBeGreaterThanOrEqual(850);
-    expect(screen.height, `${screen.id} should not become a long essay`).toBeLessThanOrEqual(1100);
-  }
-
-  expect(screens.at(-1).height).toBeGreaterThanOrEqual(1700);
-  expect(screens.at(-1).height).toBeLessThanOrEqual(2200);
-
-  for (const selector of ['.company-frame', '.founder-boundary']) {
-    const frameHeight = await page.locator(selector).evaluate((element) =>
-      element.getBoundingClientRect().height,
-    );
-    expect(frameHeight, `${selector} should own one deliberate frame`).toBeGreaterThanOrEqual(850);
-    expect(frameHeight, `${selector} should remain concise`).toBeLessThanOrEqual(1100);
-  }
-});
-
-test('orchestrates each landing argument as a one-shot motion group', async ({ page }) => {
-  await page.goto('/');
-
-  for (const name of ['hero', 'loop', 'frontiers', 'company-path', 'founder-boundary']) {
-    const group = page.locator(`[data-motion-group="${name}"]`);
-    await group.scrollIntoViewIfNeeded();
-    await expect(group).toHaveClass(/is-visible/);
-  }
-});
-
-test('starts the cinematic narrative with only the hero scene active', async ({ page }) => {
-  await page.goto('/', { waitUntil: 'domcontentloaded' });
-  await page.waitForTimeout(100);
-
-  await expect(page.locator('html')).toHaveAttribute('data-scene', 'hero');
-  const activeGroups = await page
-    .locator('[data-motion-group].is-visible')
-    .evaluateAll((groups) => groups.map((group) => group.dataset.motionGroup));
-
-  expect(activeGroups).toEqual(['hero']);
-});
-
-test('locks a stable system face when the display font misses the intro deadline', async ({
+test('locks a stable system face when the display fonts miss their deadline', async ({
   page,
   browserName,
 }) => {
   test.skip(browserName !== 'chromium', 'One delayed-font runtime probe is sufficient');
+  test.setTimeout(45_000);
 
+  await disableWebGL(page);
   await page.route('https://fonts.gstatic.com/**', async (route) => {
     await new Promise((resolve) => setTimeout(resolve, 1_400));
     await route.continue().catch(() => {});
@@ -117,334 +251,116 @@ test('locks a stable system face when the display font misses the intro deadline
 
   await expect(page.locator('html')).toHaveClass(/font-fallback/, { timeout: 5_000 });
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-  expect(await page.locator('[data-taic-font-resource]').count()).toBe(0);
+  await expect(page.locator('[data-taic-font-resource]')).toHaveCount(0);
 
-  const settledWidth = await page
-    .locator('.hero-title__line')
-    .first()
-    .evaluate((element) => element.getBoundingClientRect().width);
+  const firstLine = page.locator('#intention-title [data-mask-line]').first();
+  const settledWidth = await firstLine.evaluate(
+    (element) => element.getBoundingClientRect().width,
+  );
   await page.waitForTimeout(1_700);
-  const lateWidth = await page
-    .locator('.hero-title__line')
-    .first()
-    .evaluate((element) => element.getBoundingClientRect().width);
+  const lateWidth = await firstLine.evaluate(
+    (element) => element.getBoundingClientRect().width,
+  );
 
   expect(Math.abs(lateWidth - settledWidth)).toBeLessThan(0.5);
 });
 
-test('fails open if the motion controller cannot load', async ({ page }) => {
-  await page.route('**/site.js', (route) => route.abort());
-  await page.goto('/');
-  await page.waitForTimeout(2700);
-
-  await expect(page.locator('html')).not.toHaveClass(/motion-enabled/);
-  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-  await expect(page.getByRole('heading', { name: /Execution is not value/i })).toBeVisible();
-});
-
-test('restores the GPU field as a rendered visual layer', async ({ page }) => {
-  await page.goto('/');
-
-  await expect(page.locator('#gpu-field')).toBeAttached();
-  await expect(page.locator('#agent-swarm')).toHaveCount(0);
-  await expect(page.locator('[data-optical-surface]')).toBeAttached();
-  await expect(page.locator('html')).toHaveAttribute('data-gpu', 'ready');
-  await expect(page.locator('html')).toHaveAttribute('data-renderer', /webgl2|webgl1/);
-  await expect(page.locator('html')).toHaveAttribute('data-quality', /high|balanced|low/);
-
-  const canvasState = await page.evaluate(() => {
-    const field = document.querySelector('#gpu-field');
-    const gl = field.getContext('webgl2') || field.getContext('webgl');
-    return {
-      fieldWidth: field.width,
-      fieldHeight: field.height,
-      hasLinkedProgram: Boolean(gl.getParameter(gl.CURRENT_PROGRAM)),
-    };
-  });
-
-  expect(canvasState.fieldWidth).toBeGreaterThan(0);
-  expect(canvasState.fieldHeight).toBeGreaterThan(0);
-  expect(canvasState.hasLinkedProgram).toBeTruthy();
-});
-
-test('scrubs one proof signal reversibly through the four thesis scenes', async ({ page }) => {
-  await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto('/');
-
-  await expect(page.locator('html')).toHaveAttribute('data-scene', 'hero');
-  const topPosition = Number(await page.locator('html').getAttribute('data-scene-position'));
-
-  await page.locator('#model').scrollIntoViewIfNeeded();
-  await expect(page.locator('html')).toHaveAttribute('data-scene', 'loop');
-  const loopPosition = Number(await page.locator('html').getAttribute('data-scene-position'));
-
-  await page.locator('#frontiers').scrollIntoViewIfNeeded();
-  await expect(page.locator('html')).toHaveAttribute('data-scene', 'frontiers');
-  const frontierPosition = Number(await page.locator('html').getAttribute('data-scene-position'));
-
-  await page.locator('#company').scrollIntoViewIfNeeded();
-  await expect(page.locator('html')).toHaveAttribute('data-scene', 'company');
-  const companyPosition = Number(await page.locator('html').getAttribute('data-scene-position'));
-
-  expect(topPosition).toBeLessThan(loopPosition);
-  expect(loopPosition).toBeLessThan(frontierPosition);
-  expect(frontierPosition).toBeLessThan(companyPosition);
-
-  await page.locator('#top').scrollIntoViewIfNeeded();
-  await expect(page.locator('html')).toHaveAttribute('data-scene', 'hero');
-  const returnedPosition = Number(await page.locator('html').getAttribute('data-scene-position'));
-  expect(returnedPosition).toBeLessThan(loopPosition);
-
-  const proofState = await page.evaluate(() => ({
-    documentProgress: getComputedStyle(document.documentElement)
-      .getPropertyValue('--document-progress')
-      .trim(),
-    opticalSurfaceCount: document.querySelectorAll('[data-optical-surface]').length,
-    diagnostics: window.__TAIC_CINEMATIC__?.getSnapshot?.(),
-  }));
-
-  expect(proofState.documentProgress).not.toBe('');
-  expect(proofState.opticalSurfaceCount).toBe(1);
-  expect(proofState.diagnostics?.scene).toBe('hero');
-});
-
-test('authors live reduced-motion and context-loss states', async ({ page }) => {
-  await page.goto('/');
-  await expect(page.locator('html')).toHaveAttribute('data-render-state', 'running');
-
-  await page.emulateMedia({ reducedMotion: 'reduce' });
-  await expect(page.locator('html')).toHaveAttribute('data-motion', 'reduced');
-  await expect(page.locator('html')).toHaveAttribute('data-render-state', 'static');
-  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-
-  await page.emulateMedia({ reducedMotion: 'no-preference' });
-  await expect(page.locator('html')).toHaveAttribute('data-motion', 'full');
-  await expect(page.locator('html')).toHaveAttribute('data-render-state', 'running');
-
-  const prevented = await page.locator('#gpu-field').evaluate((canvas) => {
-    const lost = new Event('webglcontextlost', { cancelable: true });
-    canvas.dispatchEvent(lost);
-    return lost.defaultPrevented;
-  });
-  expect(prevented).toBeTruthy();
-  await expect(page.locator('html')).toHaveAttribute('data-gpu', 'context-lost');
-  await expect(page.locator('html')).toHaveAttribute('data-render-state', 'paused');
-
-  await page.locator('#gpu-field').evaluate((canvas) => {
-    canvas.dispatchEvent(new Event('webglcontextrestored'));
-  });
-  await expect(page.locator('html')).toHaveAttribute('data-gpu', 'ready');
-  await expect(page.locator('html')).toHaveAttribute('data-render-state', 'running');
-});
-
-test('rebuilds GPU resources cleanly after a real context loss', async ({ page }) => {
-  const consoleMessages = [];
-  page.on('console', (message) => {
-    consoleMessages.push(message.text());
-  });
-
-  await page.goto('/');
-  await expect(page.locator('html')).toHaveAttribute('data-gpu', 'ready');
-
-  const supportsContextLoss = await page.locator('#gpu-field').evaluate((canvas) => {
-    const context = canvas.getContext('webgl2') || canvas.getContext('webgl');
-    const extension = context?.getExtension('WEBGL_lose_context');
-    if (!extension) {
-      return false;
-    }
-
-    window.__taicContextLossExtension = extension;
-    extension.loseContext();
-    return true;
-  });
-
-  test.skip(!supportsContextLoss, 'WEBGL_lose_context is unavailable in this browser');
-  await expect(page.locator('html')).toHaveAttribute('data-gpu', 'context-lost');
-
-  await page.evaluate(() => window.__taicContextLossExtension.restoreContext());
-  await expect(page.locator('html')).toHaveAttribute('data-gpu', 'ready');
-  await expect(page.locator('html')).toHaveAttribute('data-render-state', 'running');
-  await expect
-    .poll(() => page.evaluate(() => window.__TAIC_CINEMATIC__.getSnapshot().frames))
-    .toBeGreaterThan(1);
-
-  expect(
-    consoleMessages.filter((message) =>
-      /INVALID_OPERATION.*delete|delete: object does not belong to this context/i.test(message),
-    ),
-  ).toEqual([]);
-});
-
-test('freezes the reduced-motion GPU until its framebuffer needs resizing', async ({ browser }) => {
+test('keeps the landing and complete thesis readable without JavaScript or external fonts', async ({
+  browser,
+}) => {
   const context = await browser.newContext({
-    reducedMotion: 'reduce',
-    viewport: { width: 320, height: 240 },
-    deviceScaleFactor: 2,
+    javaScriptEnabled: false,
+    viewport: { width: 393, height: 852 },
   });
   const page = await context.newPage();
-  await page.goto('/');
-  await expect(page.locator('html')).toHaveAttribute('data-render-state', 'static');
-  await page.waitForTimeout(120);
 
-  const initial = await page.evaluate(() => window.__TAIC_CINEMATIC__.getSnapshot());
-  const qualityCaps = { low: 600_000, balanced: 2_000_000, high: 4_800_000 };
-  expect(initial.frames).toBe(1);
-  expect(initial.pixelCount).toBeGreaterThan(320 * 240);
-  expect(initial.pixelCount).toBeLessThanOrEqual(qualityCaps[initial.quality]);
+  try {
+    await page.route('https://fonts.googleapis.com/**', (route) => route.abort());
+    await page.route('https://fonts.gstatic.com/**', (route) => route.abort());
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
 
-  await page.evaluate(() => {
-    for (let index = 0; index < 8; index += 1) {
-      window.dispatchEvent(new CustomEvent('taic:motion-state'));
-      window.scrollTo(0, index * 20);
+    const headings = page.locator('[data-beat] h1, [data-beat] h2');
+    await expect(headings).toHaveCount(6);
+    for (let index = 0; index < 6; index += 1) {
+      await expect(headings.nth(index)).toBeVisible();
     }
-  });
-  await page.waitForTimeout(160);
+    await expect(page.locator('a[href="./thesis/"]').first()).toBeVisible();
 
-  const frozen = await page.evaluate(() => window.__TAIC_CINEMATIC__.getSnapshot());
-  expect(frozen.frames).toBe(initial.frames);
-
-  await page.setViewportSize({ width: 360, height: 240 });
-  await page.waitForTimeout(120);
-  const resized = await page.evaluate(() => window.__TAIC_CINEMATIC__.getSnapshot());
-  expect(resized.frames).toBeGreaterThan(initial.frames);
-  expect(resized.frames - initial.frames).toBeLessThanOrEqual(2);
-  expect(resized.pixelCount).toBeLessThanOrEqual(qualityCaps[resized.quality]);
-
-  await context.close();
+    await page.goto('/thesis/', { waitUntil: 'domcontentloaded' });
+    await expect(
+      page.getByRole('heading', { level: 1, name: 'The Autonomous AI Company' }),
+    ).toBeVisible();
+    await expect(
+      page.getByText(/work has always been a proxy for value creation/i),
+    ).toBeVisible();
+    await expect(
+      page.getByText(/The Autonomous AI Company is my exploration function/i),
+    ).toBeVisible();
+  } finally {
+    await context.close();
+  }
 });
 
-test('uses WebGL1 when WebGL2 is unavailable and caps framebuffer work', async ({ page }) => {
-  await page.addInitScript(() => {
-    const originalGetContext = HTMLCanvasElement.prototype.getContext;
-    HTMLCanvasElement.prototype.getContext = function getContext(type, ...args) {
-      if (type === 'webgl2') {
-        return null;
-      }
-      return originalGetContext.call(this, type, ...args);
-    };
-  });
-
-  await page.setViewportSize({ width: 1728, height: 995 });
-  await page.goto('/');
-  await expect(page.locator('html')).toHaveAttribute('data-gpu', 'ready');
-  await expect(page.locator('html')).toHaveAttribute('data-renderer', 'webgl1');
-
-  const snapshot = await page.evaluate(() => window.__TAIC_CINEMATIC__.getSnapshot());
-  expect(snapshot.pixelCount).toBeLessThanOrEqual(4_800_000);
-});
-
-test('keeps explicit low-power profiles below the adaptive promotion ladder', async ({ page }) => {
-  await page.addInitScript(() => {
-    Object.defineProperty(navigator, 'connection', {
-      configurable: true,
-      value: { saveData: true },
-    });
-  });
-
-  await page.goto('/');
-  await expect(page.locator('html')).toHaveAttribute('data-gpu', 'ready');
-  const snapshot = await page.evaluate(() => window.__TAIC_CINEMATIC__.getSnapshot());
-  expect(snapshot.quality).toBe('low');
-  expect(snapshot.qualityCeiling).toBe('low');
-  expect(snapshot.pixelCount).toBeLessThanOrEqual(600_000);
-});
-
-test('retries with WebGL1 when WebGL2 shader initialization fails', async ({
-  page,
+test('exposes active, context-loss, and restored WebGL renderer states', async ({
   browserName,
-}) => {
-  test.skip(browserName !== 'chromium', 'Chromium provides a reliable WebGL2 test surface');
-  await page.addInitScript(() => {
-    const prototype = window.WebGL2RenderingContext?.prototype;
-    if (!prototype) {
-      return;
-    }
-    const original = prototype.getShaderParameter;
-    prototype.getShaderParameter = function getShaderParameter(shader, parameter) {
-      if (parameter === this.COMPILE_STATUS) {
-        return false;
-      }
-      return original.call(this, shader, parameter);
-    };
-  });
-
-  await page.goto('/');
-  await expect(page.locator('html')).toHaveAttribute('data-gpu', 'ready');
-  await expect(page.locator('html')).toHaveAttribute('data-renderer', 'webgl1');
-  const snapshot = await page.evaluate(() => window.__TAIC_CINEMATIC__.getSnapshot());
-  expect(snapshot.frames).toBeGreaterThan(0);
-});
-
-test('retries with WebGL1 when the first WebGL2 draw reports an error', async ({
   page,
-  browserName,
 }) => {
-  test.skip(browserName !== 'chromium', 'Chromium provides a reliable WebGL2 test surface');
-  await page.addInitScript(() => {
-    const prototype = window.WebGL2RenderingContext?.prototype;
-    if (!prototype) {
-      return;
-    }
-    const original = prototype.getError;
-    let injectedFailure = false;
-    prototype.getError = function getError() {
-      if (!injectedFailure) {
-        injectedFailure = true;
-        return this.INVALID_OPERATION;
-      }
-      return original.call(this);
-    };
-  });
+  test.skip(browserName !== 'chromium', 'One direct WebGL lifecycle probe is sufficient');
+  test.setTimeout(60_000);
+  await abortExternalFonts(page);
+  await preferLowPowerRenderer(page);
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
+  await waitForFoundry(page);
 
-  await page.goto('/');
+  const initial = await page.evaluate(() => window.__TAIC_FOUNDRY__.getSnapshot());
+  test.skip(
+    initial.renderer === 'fallback' || initial.renderer === 'none',
+    'A WebGL lifecycle requires an available renderer',
+  );
+
+  await expect
+    .poll(() =>
+      page.evaluate(() => window.__TAIC_FOUNDRY__.getSnapshot().renderState),
+    )
+    .toBe('active');
   await expect(page.locator('html')).toHaveAttribute('data-gpu', 'ready');
-  await expect(page.locator('html')).toHaveAttribute('data-renderer', 'webgl1');
-  const snapshot = await page.evaluate(() => window.__TAIC_CINEMATIC__.getSnapshot());
-  expect(snapshot.frames).toBeGreaterThan(1);
+  await expect(page.locator('html')).toHaveAttribute('data-renderer', /webgl2|webgl1/);
+
+  const prevented = await page.locator('#foundry-canvas').evaluate((canvas) => {
+    const event = new Event('webglcontextlost', { cancelable: true });
+    canvas.dispatchEvent(event);
+    return event.defaultPrevented;
+  });
+  expect(prevented).toBe(true);
+  await expect
+    .poll(
+      () =>
+        page.evaluate(() => window.__TAIC_FOUNDRY__.getSnapshot().renderState),
+      { timeout: 15_000 },
+    )
+    .toBe('paused');
+
+  await page.locator('#foundry-canvas').evaluate((canvas) => {
+    canvas.dispatchEvent(new Event('webglcontextrestored'));
+  });
+  await expect
+    .poll(
+      () =>
+        page.evaluate(() => window.__TAIC_FOUNDRY__.getSnapshot().renderState),
+      { timeout: 15_000 },
+    )
+    .toBe('active');
 });
 
-test('resumes exactly one cinematic loop after a BFCache-style restore', async ({ page }) => {
-  await page.goto('/');
-  const before = await page.evaluate(() => window.__TAIC_CINEMATIC__.getSnapshot().frames);
-
-  await page.evaluate(() => {
-    window.dispatchEvent(new PageTransitionEvent('pagehide', { persisted: true }));
-  });
-  await expect(page.locator('html')).toHaveAttribute('data-render-state', 'paused');
-
-  await page.evaluate(() => {
-    window.dispatchEvent(new PageTransitionEvent('pageshow', { persisted: true }));
-  });
-  await expect(page.locator('html')).toHaveAttribute('data-render-state', 'running');
-  await page.waitForTimeout(180);
-
-  const after = await page.evaluate(() => window.__TAIC_CINEMATIC__.getSnapshot().frames);
-  expect(after).toBeGreaterThan(before);
-  expect(after - before).toBeLessThan(30);
-});
-
-test('falls back gracefully when WebGL is unavailable', async ({ page }) => {
-  await page.addInitScript(() => {
-    const originalGetContext = HTMLCanvasElement.prototype.getContext;
-    HTMLCanvasElement.prototype.getContext = function getContext(type, ...args) {
-      if (type === 'webgl2' || type === 'webgl' || type === 'experimental-webgl') {
-        return null;
-      }
-      return originalGetContext.call(this, type, ...args);
-    };
-  });
-
-  await page.goto('/');
-  await expect(page.locator('html')).toHaveAttribute('data-gpu', 'fallback');
-  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-});
-
-test('serves the production assets, whitepaper, and social preview card', async ({ page, request }) => {
+test('serves the Foundry runtime, whitepaper, brand assets, and social card', async ({
+  page,
+  request,
+}) => {
   const responses = await Promise.all([
     request.get('/styles.css'),
-    request.get('/cinematic.css'),
+    request.get('/foundry.css'),
     request.get('/site.js'),
-    request.get('/gpu-background.js'),
+    request.get('/foundry-world.js'),
     request.get('/thesis/'),
     request.get('/logo-mark.svg'),
     request.get('/wordmark-white.png'),
@@ -452,125 +368,56 @@ test('serves the production assets, whitepaper, and social preview card', async 
   ]);
 
   for (const response of responses) {
-    expect(response.ok(), `${response.url()} should be present in the built site`).toBeTruthy();
+    expect(response.ok(), `${response.url()} should be present in the built site`).toBe(true);
   }
 
-  await page.goto('/');
+  await abortExternalFonts(page);
+  await disableWebGL(page);
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
+  await expect(
+    page.locator('link[href$="cinematic.css"], script[src$="gpu-background.js"]'),
+  ).toHaveCount(0);
   await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
     'content',
     'https://autonomousai.company/og-card.png',
   );
-  await expect(page.locator('meta[property="og:image:width"]')).toHaveAttribute('content', '1200');
-  await expect(page.locator('meta[property="og:image:height"]')).toHaveAttribute('content', '630');
+  await expect(page.locator('meta[property="og:image:width"]')).toHaveAttribute(
+    'content',
+    '1200',
+  );
+  await expect(page.locator('meta[property="og:image:height"]')).toHaveAttribute(
+    'content',
+    '630',
+  );
 });
 
-test('loads the landing page and whitepaper without client errors', async ({ page }) => {
+test('loads the animated landing and static whitepaper without client errors', async ({
+  page,
+}) => {
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
   page.on('console', (message) => {
-    if (message.type() === 'error') {
+    if (
+      message.type() === 'error' &&
+      message.text() !== 'Failed to load resource: net::ERR_FAILED'
+    ) {
       errors.push(message.text());
     }
   });
 
-  await page.goto('/');
-  await expect(page.locator('html')).toHaveAttribute('data-gpu', /ready|fallback/);
-  await page.goto('/thesis/');
-  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+  test.setTimeout(60_000);
+  await abortExternalFonts(page);
+  await preferLowPowerRenderer(page);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
+  await waitForFoundry(page);
+  const reducedSnapshot = await page.evaluate(() =>
+    window.__TAIC_FOUNDRY__.getSnapshot(),
+  );
+  expect(reducedSnapshot.reducedMotion).toBe(true);
+  expect(reducedSnapshot.renderState).toBe('static');
 
+  await page.goto('/thesis/', { waitUntil: 'domcontentloaded' });
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
   expect(errors).toEqual([]);
-});
-
-test('publishes the complete thesis and keeps the accountable founder', async ({ page }) => {
-  await page.goto('/thesis/');
-
-  await expect(page.locator('script[src*="site.js"]')).toHaveCount(0);
-  await expect(
-    page.getByRole('heading', {
-      level: 1,
-      name: /The Autonomous AI Company/i,
-    }),
-  ).toBeVisible();
-  await expect(page.getByText(/work has always been a proxy for value creation/i)).toBeVisible();
-  await expect(page.getByText(/Capital converts into scientific progress/i)).toBeVisible();
-  await expect(page.getByText(/Zero people describes the direction, not the objective/i)).toBeVisible();
-  await expect(page.getByText(/remain accountable for irreversible decisions/i)).toBeVisible();
-  await expect(
-    page.getByRole('heading', { name: /which valuable loops can we close first/i }),
-  ).toBeVisible();
-  await expect(page.getByRole('link', { name: /Back to the company/i }).first()).toBeVisible();
-});
-
-test('fits desktop and mobile viewports without horizontal clipping', async ({ page }) => {
-  for (const viewport of [
-    { width: 320, height: 720 },
-    { width: 360, height: 800 },
-    { width: 393, height: 852 },
-    { width: 768, height: 900 },
-    { width: 1024, height: 768 },
-    { width: 1440, height: 900 },
-    { width: 1728, height: 995 },
-  ]) {
-    await page.setViewportSize(viewport);
-    for (const path of ['/', '/thesis/']) {
-      await page.goto(path);
-
-      const dimensions = await page.evaluate(() => ({
-        scrollWidth: document.documentElement.scrollWidth,
-        clientWidth: document.documentElement.clientWidth,
-      }));
-
-      expect(dimensions.scrollWidth).toBeLessThanOrEqual(dimensions.clientWidth + 1);
-      await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-      await expect(page.getByRole('contentinfo')).toBeVisible();
-    }
-  }
-});
-
-test('remains readable when motion is reduced', async ({ browser }) => {
-  const context = await browser.newContext({ reducedMotion: 'reduce' });
-  const page = await context.newPage();
-
-  await page.goto('/');
-  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-  await expect(page.locator('html')).toHaveAttribute('data-motion', 'reduced');
-  await expect(page.locator('html')).not.toHaveClass(/motion-enabled/);
-
-  const motionState = await page.locator('[data-motion-group="hero"]').evaluate((element) => {
-    const styles = getComputedStyle(element);
-    return { opacity: styles.opacity, transform: styles.transform };
-  });
-  expect(motionState).toEqual({ opacity: '1', transform: 'none' });
-
-  await page.locator('#company').scrollIntoViewIfNeeded();
-  const reducedScalePhases = page.locator('[data-company-phase] strong');
-  await expect(reducedScalePhases).toHaveCount(3);
-  for (const phase of await reducedScalePhases.all()) {
-    await expect(phase).toBeVisible();
-  }
-
-  await context.close();
-});
-
-test('keeps the complete thesis visible without JavaScript or external fonts', async ({ browser }) => {
-  const context = await browser.newContext({ javaScriptEnabled: false });
-  const page = await context.newPage();
-
-  await page.route('https://fonts.googleapis.com/**', (route) => route.abort());
-  await page.route('https://fonts.gstatic.com/**', (route) => route.abort());
-  await page.goto('/');
-
-  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-  await expect(page.getByRole('link', { name: /founding thesis/i }).first()).toBeVisible();
-  const fallbackScalePhases = page.locator('[data-company-phase] strong');
-  await expect(fallbackScalePhases).toHaveCount(3);
-  for (const phase of await fallbackScalePhases.all()) {
-    await expect(phase).toBeVisible();
-  }
-
-  await page.goto('/thesis/');
-  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-  await expect(page.getByText(/work has always been a proxy for value creation/i)).toBeVisible();
-
-  await context.close();
 });
