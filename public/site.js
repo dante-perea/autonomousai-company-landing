@@ -2,6 +2,7 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Lenis from 'lenis';
 import { createFoundryWorld } from './foundry-world.js';
+import { STORY_BEATS, storyBeatIndexAt } from './foundry-story.js';
 
 gsap.registerPlugin(ScrollTrigger);
 gsap.config({ nullTargetWarn: false });
@@ -17,15 +18,6 @@ const progressReadout = document.querySelector('[data-progress-readout]');
 const progressCurrent = document.querySelector('[data-progress-current]');
 const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
 const finePointerQuery = window.matchMedia('(pointer: fine)');
-
-const BEAT_RANGES = [
-  { id: 'intention', start: 0, end: 0.105 },
-  { id: 'execution', start: 0.105, end: 0.275 },
-  { id: 'verification', start: 0.275, end: 0.425 },
-  { id: 'frontiers', start: 0.425, end: 0.625 },
-  { id: 'scale', start: 0.625, end: 0.81 },
-  { id: 'judgement', start: 0.81, end: 1 },
-];
 
 const state = {
   progress: 0,
@@ -48,6 +40,7 @@ let openingTimeline = null;
 let resizeFrame = 0;
 let previousScroll = window.scrollY;
 let previousUpdateAt = performance.now();
+const anchorBindings = [];
 
 const clamp = (value, min = 0, max = 1) => Math.min(max, Math.max(min, value));
 const smoothstep = (from, to, value) => {
@@ -98,19 +91,9 @@ const settleDisplayFonts = async () => {
   }
 };
 
-const beatIndexAt = (progress) => {
-  let activeIndex = 0;
-  for (let index = 1; index < BEAT_RANGES.length; index += 1) {
-    if (progress >= BEAT_RANGES[index].start) {
-      activeIndex = index;
-    }
-  }
-  return activeIndex;
-};
-
 const updateSemanticState = (progress) => {
-  const activeIndex = beatIndexAt(progress);
-  const active = BEAT_RANGES[activeIndex];
+  const activeIndex = storyBeatIndexAt(progress);
+  const active = STORY_BEATS[activeIndex];
   const activeChanged = activeIndex !== state.activeIndex;
 
   state.activeIndex = activeIndex;
@@ -118,7 +101,7 @@ const updateSemanticState = (progress) => {
   root.dataset.activeBeat = active.id;
 
   beats.forEach((beat, index) => {
-    const range = BEAT_RANGES[index];
+    const range = STORY_BEATS[index];
     const localProgress = clamp((progress - range.start) / Math.max(0.001, range.end - range.start));
     const enter = smoothstep(range.start, Math.min(range.end, range.start + 0.06), progress);
     const exit = index === beats.length - 1
@@ -147,7 +130,7 @@ const updateSemanticState = (progress) => {
   if (progressCurrent) {
     progressCurrent.textContent = String(activeIndex + 1).padStart(2, '0');
   } else if (progressReadout) {
-    progressReadout.textContent = `${String(activeIndex + 1).padStart(2, '0')} / ${String(BEAT_RANGES.length).padStart(2, '0')}`;
+    progressReadout.textContent = `${String(activeIndex + 1).padStart(2, '0')} / ${String(STORY_BEATS.length).padStart(2, '0')}`;
   }
 
   if (activeChanged) {
@@ -177,7 +160,7 @@ const createMasterTimeline = () => {
     clipPath: 'none',
   });
 
-  BEAT_RANGES.forEach((range, index) => {
+  STORY_BEATS.forEach((range, index) => {
     const beat = beats[index];
     if (!beat) {
       return;
@@ -236,7 +219,7 @@ const createMasterTimeline = () => {
       );
     }
 
-    if (index < BEAT_RANGES.length - 1) {
+    if (index < STORY_BEATS.length - 1) {
       masterTimeline.to(
         headlineLines,
         {
@@ -357,6 +340,20 @@ const playOpening = () => {
   );
 };
 
+const completeOpening = () => {
+  if (!openingTimeline) {
+    return;
+  }
+
+  openingTimeline.progress(1);
+  openingTimeline.kill();
+  openingTimeline = null;
+
+  if (header) {
+    gsap.set(header.children, { y: 0, autoAlpha: 1 });
+  }
+};
+
 const updateProgress = (progress, velocity = 0) => {
   if (state.destroyed) {
     return;
@@ -366,8 +363,7 @@ const updateProgress = (progress, velocity = 0) => {
   const normalizedVelocity = clamp(velocity / 2600, -1, 1);
 
   if (nextProgress > 0.018 && openingTimeline?.isActive()) {
-    openingTimeline.kill();
-    openingTimeline = null;
+    completeOpening();
   }
 
   state.progress = nextProgress;
@@ -507,6 +503,10 @@ const revealSemanticFallback = () => {
 };
 
 const applyMotionPreference = (reduced) => {
+  if (state.destroyed) {
+    return;
+  }
+
   state.reducedMotion = reduced;
   root.dataset.motion = reduced ? 'reduced' : 'full';
   createMasterTimeline();
@@ -525,10 +525,11 @@ const applyMotionPreference = (reduced) => {
   }
 
   ScrollTrigger.refresh();
+  lenis?.resize?.();
 };
 
 const seek = (progress, immediate = false) => {
-  if (!track) {
+  if (!track || state.destroyed) {
     return;
   }
 
@@ -537,17 +538,23 @@ const seek = (progress, immediate = false) => {
   const end = Math.max(start, track.offsetTop + track.offsetHeight - window.innerHeight);
   const destination = start + (end - start) * nextProgress;
 
-  if (lenis) {
-    lenis.scrollTo(destination, {
-      immediate,
-      duration: immediate ? 0 : 0.9,
-      force: true,
-    });
-  } else if (immediate) {
-    const previousScrollBehavior = root.style.scrollBehavior;
+  if (immediate) {
+    // Keep the root in native jump mode after an immediate seek. WebKit may
+    // defer scrollTo until after a same-task style restoration, which turns a
+    // deterministic jump into a partial smooth scroll.
     root.style.scrollBehavior = 'auto';
     window.scrollTo(0, destination);
-    root.style.scrollBehavior = previousScrollBehavior;
+    lenis?.resize?.();
+    lenis?.scrollTo(destination, {
+      immediate: true,
+      force: true,
+    });
+  } else if (lenis) {
+    lenis.scrollTo(destination, {
+      immediate: false,
+      duration: 0.9,
+      force: true,
+    });
   } else {
     window.scrollTo({ top: destination, behavior: 'smooth' });
   }
@@ -567,27 +574,58 @@ const snapshot = () => ({
 });
 
 const resize = () => {
+  if (state.destroyed) {
+    return;
+  }
+
   window.cancelAnimationFrame(resizeFrame);
   resizeFrame = window.requestAnimationFrame(() => {
     world?.resize();
     createLenis();
     ScrollTrigger.refresh();
+    lenis?.resize?.();
     updateFromNativeScroll();
   });
 };
 
 const pause = () => {
+  if (state.destroyed) {
+    return;
+  }
   world?.pause();
   lenis?.stop();
 };
 
 const resume = () => {
+  if (state.destroyed) {
+    return;
+  }
   if (!state.reducedMotion) {
     world?.resume();
     lenis?.start();
   }
   updateFromNativeScroll();
 };
+
+function handleVisibilityChange() {
+  if (document.hidden) {
+    pause();
+  } else {
+    resume();
+  }
+}
+
+function handlePageHide() {
+  pause();
+}
+
+function handlePageShow() {
+  resume();
+}
+
+function handleReducedMotionChange(event) {
+  applyMotionPreference(event.matches);
+}
 
 const destroy = () => {
   if (state.destroyed) {
@@ -600,14 +638,29 @@ const destroy = () => {
   masterTimeline?.kill();
   destroyLenis();
   world?.dispose();
+  world = null;
+  state.ready = false;
+  state.renderState = 'disposed';
+  root.dataset.renderState = 'disposed';
   window.cancelAnimationFrame(resizeFrame);
   window.removeEventListener('resize', resize);
   window.removeEventListener('scroll', updateFromNativeScroll);
+  document.removeEventListener('visibilitychange', handleVisibilityChange);
+  window.removeEventListener('pagehide', handlePageHide);
+  window.removeEventListener('pageshow', handlePageShow);
+  reducedMotionQuery.removeEventListener?.('change', handleReducedMotionChange);
+  anchorBindings.splice(0).forEach(({ link, handler }) => {
+    link.removeEventListener('click', handler);
+  });
 };
 
 const bindAnchors = () => {
+  anchorBindings.splice(0).forEach(({ link, handler }) => {
+    link.removeEventListener('click', handler);
+  });
+
   document.querySelectorAll('a[href^="#"]').forEach((link) => {
-    link.addEventListener('click', (event) => {
+    const handler = (event) => {
       const selector = link.getAttribute('href');
       if (!selector || selector === '#') {
         return;
@@ -619,20 +672,22 @@ const bindAnchors = () => {
       const beatIndex = beats.indexOf(target);
       if (beatIndex >= 0) {
         event.preventDefault();
-        seek(BEAT_RANGES[beatIndex].start + (beatIndex === 0 ? 0 : 0.012));
+        seek(STORY_BEATS[beatIndex].start + (beatIndex === 0 ? 0 : 0.012));
       } else if (lenis) {
         event.preventDefault();
         lenis.scrollTo(target, { offset: -72, duration: 0.95 });
       }
       window.history.replaceState(null, '', selector);
-    });
+    };
+    link.addEventListener('click', handler);
+    anchorBindings.push({ link, handler });
   });
 };
 
 const initialize = async () => {
   root.dataset.motion = state.reducedMotion ? 'reduced' : 'full';
 
-  if (!track || !stage || beats.length !== BEAT_RANGES.length) {
+  if (!track || !stage || beats.length !== STORY_BEATS.length) {
     root.classList.add('foundry-fallback');
     root.dataset.foundryReady = 'false';
     return;
@@ -660,30 +715,27 @@ const initialize = async () => {
     return;
   }
 
+  // Establish the full cinematic track before Lenis measures its scroll limit.
+  // WebKit otherwise caches the short semantic-fallback height.
+  root.dataset.foundryReady = 'true';
+  root.classList.add('motion-enabled');
   createLenis();
   createScrollDirector();
   bindAnchors();
   await fontsSettled;
 
   state.ready = true;
-  root.dataset.foundryReady = 'true';
-  root.classList.add('motion-enabled');
   updateFromNativeScroll();
   ScrollTrigger.refresh();
+  lenis?.resize?.();
   playOpening();
 
   window.addEventListener('resize', resize, { passive: true });
   window.addEventListener('scroll', updateFromNativeScroll, { passive: true });
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden) {
-      pause();
-    } else {
-      resume();
-    }
-  });
-  window.addEventListener('pagehide', pause);
-  window.addEventListener('pageshow', resume);
-  reducedMotionQuery.addEventListener?.('change', (event) => applyMotionPreference(event.matches));
+  document.addEventListener('visibilitychange', handleVisibilityChange);
+  window.addEventListener('pagehide', handlePageHide);
+  window.addEventListener('pageshow', handlePageShow);
+  reducedMotionQuery.addEventListener?.('change', handleReducedMotionChange);
 };
 
 initialize().catch((error) => {

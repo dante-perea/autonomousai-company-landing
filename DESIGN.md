@@ -2,15 +2,15 @@
 
 ## Direction
 
-The landing page is an autonomous foundry: a monumental, high-key industrial film in which one intent core is transformed into verified value. It should feel authored, tactile, quiet, and expensive. It must never resemble a neon AI dashboard, a game fly-through, or a gallery of disconnected WebGL tricks.
+The landing page is a continuous high-key material film about the accumulation of organized agency. One persistent signal moves from entropy to atomic structure, inherited information, engineered intelligence, autonomous verification loops, and finally human judgement. It should feel authored, tactile, quiet, and expensive. It must never resemble a neon AI dashboard, a science-documentary montage, or a gallery of disconnected WebGL tricks.
 
 ## Governing Rules
 
 1. One world, one protagonist, one camera, one reversible playhead.
 2. At every scroll position there is one dominant phrase and one legible material event.
 3. The renderer occupies the right visual field; semantic copy owns a protected left field.
-4. Transitions are physical: apertures, thresholds, occlusion, assembly, and light. Full-frame fades are prohibited.
-5. Geometry must belong to one instrument family. Avoid stock planets, wagon wheels, floating demo cubes, and decorative particles.
+4. Every new form must grow from material already present in the previous form. Full-frame fades and object swaps are prohibited.
+5. Geometry must belong to one material family. Avoid Bohr-model atoms, stock rotating DNA, glowing brains, chips, portals, code rain, and decorative particle explosions.
 
 ## Palette
 
@@ -23,7 +23,7 @@ The landing page is an autonomous foundry: a monumental, high-key industrial fil
 - Research teal: `oklch(0.53 0.105 184)`
 - Accountability amber: `oklch(0.66 0.16 54)`
 
-Color belongs to state changes. Violet begins unresolved. Execution cools toward steel. Verification shifts through blue and teal. Scale becomes neutral. Amber arrives only at the founder boundary.
+Color belongs to state changes. Violet begins as unresolved possibility. Titanium and cool white mark stable structure and computation. Teal appears only after verification. Blue marks the slower research horizon. Amber arrives only at the founder boundary.
 
 ## Typography
 
@@ -31,11 +31,12 @@ Mona Sans Variable is the display and reading family. Martian Mono is reserved f
 
 ## Composition
 
-- Six beats: intention, execution, verification, frontiers, scale, judgement.
+- Six narrative beats: entropy, atoms, DNA, intelligence, autonomous AI, human judgement.
+- The semantic argument remains: intention, execution, verification, applications and research, company to CRO to lab, and founder judgement.
 - The company name remains one horizontal lockup.
 - One quiet progress system; no competing HUDs.
 - A translucent ivory field protects copy from high-contrast geometry.
-- Desktop stages the instrument at the right. Mobile uses an aspect-aware camera and stronger vertical separation.
+- Desktop stages the transformation at the right. Mobile uses a dedicated portrait camera with clear cinema and copy fields.
 - The complete argument and sources live on the dedicated whitepaper page.
 
 ## Motion
@@ -44,8 +45,12 @@ GSAP ScrollTrigger owns normalized progress. Lenis may smooth eligible wheel inp
 
 ## Rendering
 
-One Three.js renderer, one scene, one camera, and one persistent intent core survive the entire journey. Materials favor ceramic, brushed metal, glass, and controlled emission. Studio lighting, restrained atmosphere, and selective high-tier effects may create depth; postprocessing cannot disguise weak geometry. Adaptive quality removes secondary instances and dust before sacrificing core silhouette or framebuffer clarity. Rendering pauses when hidden, recovers after context restoration, and fails open to readable semantic content.
+One Three.js renderer, one scene, one camera, and one persistent phase trace survive the entire journey. The same seeded material population morphs from particulate noise into probability volumes, bonds, DNA, a computational field, and recursive proof loops. AI is represented as prediction corrected by measured reality, not as a brain or humanoid. Materials favor ceramic, brushed titanium, milky translucent volumes, and controlled emission. Studio lighting, restrained atmosphere, and selective high-tier effects may create depth; postprocessing cannot disguise weak geometry. Adaptive quality removes secondary instances before sacrificing the persistent signal or stage silhouette. Rendering pauses when hidden, recovers after context restoration, and fails open to readable semantic content.
 
 ## Accountability
 
-Operational complexity may assemble and recede. The founder plane does not. The final act physically returns the core to a fixed human boundary, where judgement and accountability remain visible and amber receives its only full payoff.
+Autonomous loops may assemble and continue operating. The founder plane does not move. The final verified signal reaches that fixed human boundary and stops before crossing, making judgement and accountability visible while amber receives its only full payoff.
+
+## Scientific Framing
+
+The sequence is a visual metaphor for increasing organized agency, not a claim that entropy inevitably becomes AI. Atoms are shown as probability volumes rather than planetary orbits. DNA is presented as one durable information store rather than the origin of life. The biological-to-computational transition includes a visibly engineered calibration plane so AI reads as human-built technology, not the next rung of biological evolution.

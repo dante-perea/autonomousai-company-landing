@@ -77,6 +77,12 @@ test('ships a concise six-beat landing derived from the founder thesis', async (
   assert.match(html, /Everything delegated\./);
   assert.match(html, /Except judgement\./);
   assert.match(html, /remains accountable for irreversible decisions/i);
+  assert.match(html, />Entropy<\/span>/);
+  assert.match(html, />Atoms<\/span>/);
+  assert.match(html, />DNA<\/span>/);
+  assert.match(html, />Intelligence<\/span>/);
+  assert.match(html, />AI<\/span>/);
+  assert.match(html, />Human judgement<\/span>/);
   assert.doesNotMatch(html, /Sam Altman recently/i);
   assert.doesNotMatch(html, /Primary sources/i);
 });
@@ -119,6 +125,8 @@ test('wires the landing to the Foundry architecture and semantic fallback', asyn
   const foundryCss = await fileText('foundry.css');
   const director = await fileText('site.js');
   const world = await fileText('foundry-world.js');
+  const evolution = await fileText('evolution-system.js');
+  const story = await fileText('foundry-story.js');
 
   assert.match(html, /<html[\s\S]*?lang="en"[^>]*>/);
   assert.match(html, /<title>The Autonomous AI Company<\/title>/);
@@ -159,6 +167,7 @@ test('wires the landing to the Foundry architecture and semantic fallback', asyn
 
   assert.match(director, /ScrollTrigger/);
   assert.match(director, /createFoundryWorld/);
+  assert.match(director, /STORY_BEATS/);
   assert.match(director, /window\.__TAIC_FOUNDRY__/);
   assert.match(director, /getSnapshot:\s*snapshot/);
   assert.match(director, /seek/);
@@ -170,11 +179,26 @@ test('wires the landing to the Foundry architecture and semantic fallback', asyn
   assert.match(world, /new THREE\.WebGLRenderer/);
   assert.match(world, /new THREE\.PerspectiveCamera/);
   assert.match(world, /new THREE\.CatmullRomCurve3/);
+  assert.match(world, /createEvolutionSystem/);
   assert.match(world, /webglcontextlost/);
   assert.match(world, /webglcontextrestored/);
   assert.match(world, /visibilitychange/);
   assert.match(world, /rendererCount:\s*1/);
   assert.match(world, /renderState:\s*'fallback'/);
+
+  assert.match(story, /entropy/);
+  assert.match(story, /atoms/);
+  assert.match(story, /dna/);
+  assert.match(story, /intelligence/);
+  assert.match(story, /autonomous-company/);
+  assert.match(story, /founder-boundary/);
+  assert.match(evolution, /probability/i);
+  assert.match(evolution, /calibration/i);
+  assert.match(evolution, /proof/i);
+  assert.match(evolution, /founder-boundary/i);
+  assert.doesNotMatch(evolution, /execution-machinery-corridor/);
+  assert.doesNotMatch(evolution, /physical-validation-scanner/);
+  assert.doesNotMatch(evolution, /company-cro-lab-nested-reveal/);
 });
 
 test('keeps the brand and social assets intact', async () => {
@@ -182,6 +206,7 @@ test('keeps the brand and social assets intact', async () => {
   assert.ok((await fileSize('wordmark-white.png')) > 10_000);
   assert.ok((await fileSize('foundry.css')) > 10_000);
   assert.ok((await fileSize('foundry-world.js')) > 20_000);
+  assert.ok((await fileSize('evolution-system.js')) > 20_000);
   assert.deepEqual(await pngDimensions('og-card.png'), {
     width: 1200,
     height: 630,
