@@ -1,23 +1,25 @@
-const sectionLinks = [...document.querySelectorAll(".site-nav a")];
+const sectionLinks = [...document.querySelectorAll('.site-nav a[href^="#"]')];
 const trackedSections = sectionLinks
-  .map((link) => document.querySelector(link.getAttribute("href")))
+  .map((link) => document.querySelector(link.getAttribute('href')))
   .filter(Boolean);
 
-if ("IntersectionObserver" in window && trackedSections.length > 0) {
+if ('IntersectionObserver' in window && trackedSections.length > 0) {
   const navigationObserver = new IntersectionObserver(
     (entries) => {
       const visibleEntry = entries
         .filter((entry) => entry.isIntersecting)
         .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
 
-      if (!visibleEntry) return;
+      if (!visibleEntry) {
+        return;
+      }
 
       sectionLinks.forEach((link) => {
-        const isCurrent = link.getAttribute("href") === `#${visibleEntry.target.id}`;
+        const isCurrent = link.getAttribute('href') === `#${visibleEntry.target.id}`;
         if (isCurrent) {
-          link.setAttribute("aria-current", "true");
+          link.setAttribute('aria-current', 'true');
         } else {
-          link.removeAttribute("aria-current");
+          link.removeAttribute('aria-current');
         }
       });
     },

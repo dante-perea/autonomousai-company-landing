@@ -1,30 +1,31 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-gpu="loading">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#0a0c12">
-  <meta name="description" content="The founding thesis of The Autonomous AI Company: from fewer people, to one-person companies, to companies with zero standing employees.">
+  <meta name="theme-color" content="#090a10">
+  <meta name="description" content="The Autonomous AI Company explores how valuable execution-validation loops move from AI-assisted, to automated, to autonomous.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://autonomousai.company/">
   <meta property="og:title" content="The Autonomous AI Company">
-  <meta property="og:description" content="Which valuable loops can we close first?">
+  <meta property="og:description" content="From companies with fewer people to companies with zero standing employees.">
   <meta property="og:image" content="https://autonomousai.company/og-card.png">
   <meta property="og:image:secure_url" content="https://autonomousai.company/og-card.png">
   <meta property="og:image:type" content="image/png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="The Autonomous AI Company founding thesis: moving toward companies with zero standing employees.">
+  <meta property="og:image:alt" content="The Autonomous AI Company: moving toward companies with zero standing employees.">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="The Autonomous AI Company">
   <meta name="twitter:description" content="Which valuable loops can we close first?">
   <meta name="twitter:image" content="https://autonomousai.company/og-card.png">
-  <title>The Autonomous AI Company | Founding Thesis</title>
+  <title>The Autonomous AI Company</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Azeret+Mono:wght@400;500;600&family=Saira:wght@400;500;600;700&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./styles.css">
   <script src="./site.js" defer></script>
+  <script src="./gpu-background.js" defer></script>
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -40,8 +41,15 @@
     }
   </script>
 </head>
-<body>
-  <a class="skip-link" href="#main-content">Skip to the thesis</a>
+<body class="landing-page">
+  <a class="skip-link" href="#main-content">Skip to the company</a>
+
+  <div class="ambient-field" aria-hidden="true">
+    <canvas id="gpu-field"></canvas>
+    <div class="field-veil"></div>
+    <canvas id="agent-swarm"></canvas>
+    <div class="field-grid"></div>
+  </div>
 
   <header class="site-header">
     <a class="brand" href="#top" aria-label="The Autonomous AI Company, home">
@@ -49,356 +57,137 @@
       <img class="brand__wordmark" src="./wordmark-white.png" alt="The Autonomous AI Company">
     </a>
 
-    <nav class="site-nav" aria-label="Thesis sections">
-      <a href="#applications">Applications</a>
-      <a href="#research">Research</a>
+    <nav class="site-nav" aria-label="Primary navigation">
+      <a href="#model">The model</a>
       <a href="#company">The company</a>
+      <a href="./thesis/">Whitepaper</a>
     </nav>
 
-    <a class="header-action" href="#first-move">The first move</a>
+    <a class="header-action" href="./thesis/">Read the thesis</a>
   </header>
 
   <main id="main-content">
-    <section class="hero" id="top" aria-labelledby="hero-title">
-      <div class="hero__copy">
-        <p class="document-label">Founding thesis <span aria-hidden="true">/</span> 2026</p>
+    <section class="hero" id="top" data-field-state="hero" aria-labelledby="hero-title">
+      <div class="hero__inner">
+        <p class="eyebrow">A founder-led, agent-operated company</p>
         <h1 id="hero-title">
-          We are moving from companies with fewer people,
+          From companies with fewer people,
           <span>to one-person companies,</span>
           <strong>to companies with zero standing employees.</strong>
         </h1>
         <p class="hero__lead">
-          Not because people lack value, but because work has always been a proxy for value creation. Startups produce value for users; until now, people supplied the skills and time. AI changes that mechanism.
+          Not because people lack value, but because work has always been a proxy for value creation. AI changes that mechanism.
+        </p>
+        <p class="hero__guardrail">
+          Zero people describes the direction, not the objective. The objective remains value creation.
         </p>
         <div class="hero__actions">
-          <a class="button button--primary" href="#mechanism">Read the thesis</a>
-          <a class="button button--quiet" href="#company">What “zero people” means</a>
+          <a class="button button--primary" href="./thesis/">Read the whitepaper</a>
+          <a class="button button--quiet" href="https://github.com/dante-perea" target="_blank" rel="noreferrer">See what I’m building</a>
         </div>
       </div>
 
-      <figure class="loop-figure" aria-labelledby="loop-title">
-        <svg class="loop-map" viewBox="0 0 640 520" role="img" aria-labelledby="loop-title loop-description">
-          <title id="loop-title">The value creation loop</title>
-          <desc id="loop-description">Intention moves through execution and validation to produce value, with feedback returning to the next intention.</desc>
-          <defs>
-            <linearGradient id="loop-gradient" x1="96" y1="72" x2="556" y2="448" gradientUnits="userSpaceOnUse">
-              <stop offset="0" stop-color="#7b5cff"></stop>
-              <stop offset="0.52" stop-color="#3d8fff"></stop>
-              <stop offset="1" stop-color="#28d5ba"></stop>
-            </linearGradient>
-            <filter id="soft-glow" x="-40%" y="-40%" width="180%" height="180%">
-              <feGaussianBlur stdDeviation="7" result="blur"></feGaussianBlur>
-              <feMerge>
-                <feMergeNode in="blur"></feMergeNode>
-                <feMergeNode in="SourceGraphic"></feMergeNode>
-              </feMerge>
-            </filter>
-          </defs>
-
-          <path class="loop-map__rail" d="M120 118 H502 Q542 118 542 158 V360 Q542 404 498 404 H138 Q94 404 94 360 V164 Q94 118 140 118"></path>
-          <path class="loop-map__flow" d="M120 118 H502 Q542 118 542 158 V360 Q542 404 498 404 H138 Q94 404 94 360 V164 Q94 118 140 118"></path>
-
-          <g class="loop-node loop-node--intent">
-            <circle cx="118" cy="118" r="24"></circle>
-            <text x="118" y="78" text-anchor="middle">INTENTION</text>
-          </g>
-          <g class="loop-node loop-node--execution">
-            <circle cx="542" cy="184" r="24"></circle>
-            <text x="502" y="190" text-anchor="end">EXECUTION</text>
-          </g>
-          <g class="loop-node loop-node--validation">
-            <circle cx="492" cy="404" r="24"></circle>
-            <text x="492" y="456" text-anchor="middle">VALIDATION</text>
-          </g>
-          <g class="loop-node loop-node--value">
-            <circle cx="94" cy="338" r="24"></circle>
-            <text x="138" y="344">VALUE</text>
-          </g>
-
-          <g class="loop-map__center" filter="url(#soft-glow)">
-            <circle cx="318" cy="260" r="104"></circle>
-            <text x="318" y="246" text-anchor="middle">A VALUABLE</text>
-            <text x="318" y="282" text-anchor="middle">CLOSED LOOP</text>
-          </g>
-        </svg>
-        <figcaption>
-          The cost of turning intention into valuable output is collapsing while the range of outcomes AI can produce expands.
-        </figcaption>
-      </figure>
+      <div class="render-label" aria-hidden="true">
+        <span></span>
+        WebGL field · rendered on this device
+      </div>
+      <a class="scroll-cue" href="#model">The model <span aria-hidden="true">↓</span></a>
     </section>
 
-    <section class="manifesto-section" id="mechanism" aria-labelledby="mechanism-title">
-      <div class="section-index" aria-hidden="true">01</div>
-      <div class="section-body">
-        <p class="section-kicker">The mechanism</p>
-        <h2 id="mechanism-title">The range of possible outcomes is expanding.</h2>
-
-        <div class="prose prose--large">
-          <p>
-            Sam Altman recently compared advanced AI to a genie able to grant any wish. He has written that we are “past the event horizon”; Elon Musk has said we are “on the event horizon of the singularity.”
-          </p>
-          <p>
-            These are different expressions of the same fact: the cost of turning intention into valuable output is collapsing while the range of outcomes AI can produce expands.
-          </p>
-        </div>
-
-        <div class="source-line" aria-label="Sources for the preceding claims">
-          <span>Primary sources</span>
-          <a href="https://www.youtube.com/watch?v=Vv3CEAS_w34&t=2605s" target="_blank" rel="noreferrer">Altman, genie metaphor</a>
-          <a href="https://blog.samaltman.com/the-gentle-singularity" target="_blank" rel="noreferrer">Altman, event horizon</a>
-          <a href="https://x.com/elonmusk/status/1893810875875889507" target="_blank" rel="noreferrer">Musk, event horizon</a>
-        </div>
-
-        <aside class="thought-experiment" aria-labelledby="experiment-title">
-          <div>
-            <p class="thought-experiment__label">Thought experiment</p>
-            <h3 id="experiment-title">Let’s assume two statements are true.</h3>
-          </div>
-          <ol>
-            <li>
-              <span>01</span>
-              AI can already perform a meaningful share of work previously done by people.
-            </li>
-            <li>
-              <span>02</span>
-              Its capabilities and adoption will continue to grow.
-            </li>
-          </ol>
-          <p>
-            If both hold, regardless of the rate, AI will eventually become more productive than the most capable available human across an expanding set of economically valuable tasks.
-          </p>
-        </aside>
-      </div>
-    </section>
-
-    <section class="layers-intro" aria-labelledby="layers-title">
-      <p class="layers-intro__lead" id="layers-title">
-        These tasks can be divided into two layers:
-      </p>
-      <div class="layers-intro__links">
-        <a href="#applications">
-          <span>01</span>
-          Applications
-        </a>
-        <a href="#research">
-          <span>02</span>
-          Research
-        </a>
-      </div>
-    </section>
-
-    <section class="layer layer--applications" id="applications" aria-labelledby="applications-title">
-      <div class="layer__header">
-        <div>
-          <p class="layer__number">01</p>
-          <p class="section-kicker">First, applications</p>
-        </div>
-        <h2 id="applications-title">Software has been solved.</h2>
+    <section class="mechanism-section" id="model" data-field-state="mechanism" aria-labelledby="mechanism-title">
+      <div class="section-heading">
+        <p class="section-number">01</p>
+        <h2 id="mechanism-title">The cost of turning intention into valuable output is collapsing.</h2>
       </div>
 
-      <div class="layer__grid">
-        <div class="prose">
-          <p>
-            Naval Ravikant’s four forms of leverage are labor, capital, code and media. SaaS, as a subscription-based business model, was able to capture code’s leverage, but expensive development required large markets.
-          </p>
-          <p>
-            AI-assisted coding, and then vibe coding, reduced the cost and knowledge required to build. Smaller niches and internal use cases can now justify specialized software.
-          </p>
-          <a class="inline-source" href="https://nav.al/rich" target="_blank" rel="noreferrer">Naval Ravikant on leverage</a>
-        </div>
-
-        <div class="definition">
-          <p class="definition__lead">What “solved” means</p>
-          <p>
-            Not that every application exists or engineering no longer matters. A workflow represented and verified in software can increasingly move from AI-assisted, to automated, to autonomous.
-          </p>
-        </div>
+      <div class="loop-line" aria-label="The value creation loop">
+        <span>Intention</span>
+        <i aria-hidden="true">→</i>
+        <span>Execution</span>
+        <i aria-hidden="true">→</i>
+        <span>Validation</span>
+        <i aria-hidden="true">→</i>
+        <span>Value</span>
+        <i aria-hidden="true">↺</i>
       </div>
 
-      <div class="leverage-band" aria-label="Four forms of leverage">
-        <span>Labor</span>
-        <span>Capital</span>
-        <span class="leverage-band__active">Code</span>
-        <span>Media</span>
-      </div>
-
-      <div class="maturity-flow" aria-label="Software autonomy progression">
-        <div>
-          <span>01</span>
-          <strong>AI-assisted</strong>
-          <p>Humans direct each important step.</p>
-        </div>
-        <div>
-          <span>02</span>
-          <strong>Automated</strong>
-          <p>Known steps run without repeated direction.</p>
-        </div>
-        <div>
-          <span>03</span>
-          <strong>Autonomous</strong>
-          <p>The loop executes, validates and adapts within boundaries.</p>
-        </div>
-      </div>
-
-      <p class="scarcity-statement">
-        As software production becomes abundant, scarcity moves toward
-        <span>attention</span>,
-        <span>trust</span>,
-        <span>distribution</span>
-        and <span>ownership of valuable feedback loops</span>.
+      <p class="mechanism-copy">
+        As the range of outcomes AI can produce expands, the useful unit is not a job replaced. It is a valuable loop closed.
       </p>
     </section>
 
-    <section class="layer layer--research" id="research" aria-labelledby="research-title">
-      <div class="layer__header">
-        <div>
-          <p class="layer__number">02</p>
-          <p class="section-kicker">The second layer</p>
-        </div>
-        <h2 id="research-title">The next frontier is verification.</h2>
+    <section class="frontiers-section" id="frontiers" data-field-state="frontiers" aria-labelledby="frontiers-title">
+      <div class="section-heading section-heading--compact">
+        <p class="section-number">02</p>
+        <h2 id="frontiers-title">Two frontiers</h2>
       </div>
 
-      <div class="research-intro">
-        <div class="prose">
+      <div class="frontier-row">
+        <article>
+          <p class="frontier-label">Applications</p>
+          <h3>Software has been solved.</h3>
           <p>
-            Software development moved first because it offers a closed loop: generate, run, test and revise. Science has historically had slower, more expensive verification loops.
+            Not because every application exists or engineering no longer matters. A workflow represented and verified in software can increasingly move from AI-assisted, to automated, to autonomous.
           </p>
+        </article>
+
+        <article>
+          <p class="frontier-label">Research</p>
+          <h3>Verification is the frontier.</h3>
           <p>
-            Claude Science is now attempting to reduce the gap by giving researchers auditable, reproducible workflows. Periodic Labs, backed by investors including Eric Schmidt, says it is building AI scientists and autonomous laboratories for them to operate.
+            The next frontier is making scientific verification cheaper, faster and increasingly autonomous.
           </p>
-        </div>
-
-        <div class="verification-map" aria-label="Software and scientific verification loops">
-          <div class="verification-loop">
-            <p>Software loop</p>
-            <div>
-              <span>Generate</span>
-              <span>Run</span>
-              <span>Test</span>
-              <span>Revise</span>
-            </div>
-          </div>
-          <div class="verification-loop verification-loop--physical">
-            <p>Scientific loop</p>
-            <div>
-              <span>Hypothesize</span>
-              <span>Experiment</span>
-              <span>Measure</span>
-              <span>Reproduce</span>
-              <span>Revise</span>
-            </div>
-          </div>
-        </div>
+        </article>
       </div>
-
-      <div class="source-line" aria-label="Sources for research examples">
-        <span>Primary sources</span>
-        <a href="https://www.anthropic.com/news/claude-science-ai-workbench" target="_blank" rel="noreferrer">Anthropic, Claude Science</a>
-        <a href="https://periodic.com/" target="_blank" rel="noreferrer">Periodic Labs</a>
-      </div>
-
-      <blockquote class="capital-statement">
-        <p>Capital converts into scientific progress at the rate at which money buys iteration cycles.</p>
-        <footer>
-          AI advanced quickly because verification became cheap. The next frontier is making scientific verification cheaper, faster and increasingly autonomous.
-        </footer>
-      </blockquote>
     </section>
 
-    <section class="company-section" id="company" aria-labelledby="company-title">
-      <div class="company-section__intro">
-        <p class="document-label">The company</p>
+    <section class="company-section" id="company" data-field-state="company" aria-labelledby="company-title">
+      <div class="company-statement">
+        <p class="section-number">03</p>
         <h2 id="company-title">The Autonomous AI Company is my exploration function for this future.</h2>
-        <p class="company-section__question">
-          How do we approach zero-people companies, then zero-people contract research organizations, and eventually zero-people labs?
-        </p>
       </div>
 
-      <ol class="company-path" aria-label="The Autonomous AI Company progression">
+      <ol class="company-path" aria-label="The company’s exploration path">
         <li>
           <span>Now</span>
           <strong>Zero-people companies</strong>
-          <p>Close valuable application loops.</p>
         </li>
         <li>
           <span>Next</span>
           <strong>Zero-people contract research organizations</strong>
-          <p>Close repeatable research delivery loops.</p>
         </li>
         <li>
           <span>Frontier</span>
           <strong>Zero-people labs</strong>
-          <p>Close physical scientific verification loops.</p>
         </li>
       </ol>
 
       <div class="founder-boundary">
-        <div>
-          <p class="founder-boundary__statement">
-            Zero people describes the direction, not the objective. The objective remains value creation.
-          </p>
-          <p>
-            The AI Native Founder does not disappear: they decide which outcomes matter, establish boundaries and remain accountable for irreversible decisions.
-          </p>
-        </div>
-
-        <div class="authority-diagram" aria-label="Founder authority boundary">
-          <div class="authority-diagram__delegated">
-            <span>Delegated over time</span>
-            <strong>Execution</strong>
-            <strong>Iteration</strong>
-            <strong>Validated routines</strong>
+        <p>
+          The AI Native Founder does not disappear. They decide which outcomes matter, establish boundaries and remain accountable for irreversible decisions.
+        </p>
+        <dl>
+          <div>
+            <dt>Delegate</dt>
+            <dd>Execution · iteration · validated routines</dd>
           </div>
-          <div class="authority-diagram__retained">
-            <span>Founder retained</span>
-            <strong>Judgement</strong>
-            <strong>Boundaries</strong>
-            <strong>Accountability</strong>
+          <div>
+            <dt>Retain</dt>
+            <dd>Judgement · boundaries · accountability</dd>
           </div>
-        </div>
+        </dl>
       </div>
-
-      <p class="judgement-statement">
-        Eventually we will reach the point where everything is delegated except our judgement.
-      </p>
     </section>
 
-    <section class="first-move" id="first-move" aria-labelledby="first-move-title">
-      <p class="document-label">The first move</p>
-      <h2 id="first-move-title">
-        Stop asking which job AI can replace and start asking:
-        <span>which valuable loops can we close first?</span>
-      </h2>
-      <p class="first-move__subhead">
-        And how can we capture part of the value created while closing them?
+    <section class="closing-section" id="first-move" data-field-state="closing" aria-labelledby="closing-title">
+      <p class="eyebrow">The first move</p>
+      <h2 id="closing-title">Which valuable loops can we close first?</h2>
+      <p>
+        Identify a valuable outcome. Close its execution-validation loop. Make verification cheap. Then build distribution and feedback around it.
       </p>
-
-      <ol class="founder-loop">
-        <li>
-          <span>01</span>
-          <strong>Identify a valuable outcome</strong>
-        </li>
-        <li>
-          <span>02</span>
-          <strong>Close its execution-validation loop</strong>
-        </li>
-        <li>
-          <span>03</span>
-          <strong>Make verification cheap</strong>
-        </li>
-        <li>
-          <span>04</span>
-          <strong>Build distribution and feedback around it</strong>
-        </li>
-      </ol>
-
-      <p class="closing-thesis">
-        For AI-native founders: identify a valuable outcome, close its execution-validation loop, make verification cheap, then build distribution and feedback around it.
-      </p>
-
       <div class="closing-actions">
-        <a class="button button--primary" href="https://github.com/dante-perea" target="_blank" rel="noreferrer">See what I’m building</a>
-        <a class="button button--quiet" href="#top">Return to the beginning</a>
+        <a class="button button--primary" href="./thesis/">Read the full whitepaper</a>
+        <a class="text-link" href="#top">Return to the beginning <span aria-hidden="true">↑</span></a>
       </div>
     </section>
   </main>

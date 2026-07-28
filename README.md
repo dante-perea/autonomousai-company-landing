@@ -1,8 +1,8 @@
 # The Autonomous AI Company Landing
 
-The public founding thesis for [autonomousai.company](https://autonomousai.company).
+The public home of [autonomousai.company](https://autonomousai.company).
 
-The landing page explains the progression from companies with fewer people to companies with zero standing employees, the applications and research layers, the role of verification, and the authority retained by the AI Native Founder.
+The root landing page is a concise introduction to the company. The complete founder thesis is published as a whitepaper at `/thesis/`. The signature procedural WebGL field is rendered locally in the visitor’s browser and degrades gracefully when WebGL or continuous motion is unavailable.
 
 ## Development
 
@@ -11,7 +11,7 @@ npm install
 npm run dev
 ```
 
-Open the local URL Vite prints. The root page is `public/index.html`, with its visual system in `public/styles.css` and small progressive enhancements in `public/site.js`.
+Open the local URL Vite prints. The root page is `public/index.html`; the whitepaper is `public/thesis/index.html`; the visual system is `public/styles.css`; and the GPU field is isolated in `public/gpu-background.js`.
 
 ## Verification
 
@@ -19,7 +19,7 @@ Open the local URL Vite prints. The root page is `public/index.html`, with its v
 npm run verify
 ```
 
-This runs static contract tests, builds the deployable `dist/` folder, and checks the page at desktop and mobile sizes with Playwright.
+This runs static contract tests, builds the deployable `dist/` folder, and checks both the landing page and whitepaper at desktop and mobile sizes with Playwright.
 
 ## Deployment
 
