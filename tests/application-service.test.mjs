@@ -33,6 +33,11 @@ const environment = {
   POSTHOG_PROJECT_TOKEN: 'test-posthog-token',
   POSTHOG_HOST: 'https://us.i.posthog.com',
 };
+const allowRateLimit = async () => ({
+  allowed: true,
+  attempts: 1,
+  retryAfterSeconds: 900,
+});
 
 test('normalizes values and applies the published ICP thresholds', () => {
   const application = normalizeApplication(validInput);
@@ -82,6 +87,7 @@ test('delivers the application notification before recording conversion', async 
     },
     {
       fetchImpl,
+      rateLimiter: allowRateLimit,
       now: () => new Date('2026-07-28T09:00:00.000Z'),
       randomUUID: () => '12345678-abcd-4000-8000-123456789abc',
     },
@@ -122,6 +128,7 @@ test('does not report success when founder notification fails', async () => {
       { environment },
       {
         fetchImpl,
+        rateLimiter: allowRateLimit,
         now: () => new Date('2026-07-28T09:00:00.000Z'),
         randomUUID: () => '12345678-abcd-4000-8000-123456789abc',
       },
@@ -140,6 +147,7 @@ test('rejects incomplete submissions before calling external services', async ()
         calls += 1;
         return new Response();
       },
+      rateLimiter: allowRateLimit,
     },
   );
 
@@ -160,11 +168,67 @@ test('silently filters honeypot submissions without external calls', async () =>
         return new Response();
       },
       now: () => new Date('2026-07-28T09:00:00.000Z'),
+      rateLimiter: allowRateLimit,
     },
   );
 
   assert.equal(result.ok, true);
   assert.equal(result.spam, true);
+  assert.equal(calls, 0);
+});
+
+test('rejects invalid direct-API economics before external calls', async () => {
+  const invalidValues = [
+    0,
+    '',
+    'not-a-number',
+    true,
+    '0x10',
+    '1e4',
+    15_000.5,
+  ];
+
+  for (const value of invalidValues) {
+    let calls = 0;
+    const result = await processApplication(
+      { ...validInput, averageContractValue: value },
+      { environment },
+      {
+        fetchImpl: async () => {
+          calls += 1;
+          return new Response();
+        },
+        rateLimiter: allowRateLimit,
+      },
+    );
+
+    assert.equal(result.status, 400);
+    assert.match(result.error, /average contract value is invalid/i);
+    assert.equal(calls, 0);
+  }
+});
+
+test('returns a retryable 429 before notification when the address is throttled', async () => {
+  let calls = 0;
+  const result = await processApplication(
+    validInput,
+    { environment, clientAddress: '203.0.113.7' },
+    {
+      fetchImpl: async () => {
+        calls += 1;
+        return new Response();
+      },
+      rateLimiter: async () => ({
+        allowed: false,
+        attempts: 4,
+        retryAfterSeconds: 321,
+      }),
+    },
+  );
+
+  assert.equal(result.ok, false);
+  assert.equal(result.status, 429);
+  assert.equal(result.retryAfterSeconds, 321);
   assert.equal(calls, 0);
 });
 

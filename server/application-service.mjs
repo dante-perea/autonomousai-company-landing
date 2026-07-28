@@ -1,7 +1,11 @@
 import { corsHeaders, preflightResponse } from './cors.mjs';
+import { enforceApplicationRateLimit } from './rate-limit.mjs';
 
 const MAX_TEXT_LENGTH = 1_600;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const TEAM_SIZES = new Set(['1-4', '5-25', '26-50', '51+']);
+const ANNUAL_REVENUES = new Set(['under-1m', '1m-3m', '3m-10m', 'over-10m']);
+const START_WINDOWS = new Set(['within-7-days', 'within-30-days', 'later']);
 
 function cleanText(value, maximum = MAX_TEXT_LENGTH) {
   if (typeof value !== 'string') return '';
@@ -9,7 +13,15 @@ function cleanText(value, maximum = MAX_TEXT_LENGTH) {
 }
 
 function cleanNumber(value) {
-  const number = Number(value);
+  if (typeof value !== 'number' && typeof value !== 'string') return 0;
+  const normalized = typeof value === 'string' ? value.trim() : value;
+  if (
+    typeof normalized === 'string' &&
+    !/^(?:0|[1-9]\d*)(?:\.\d+)?$/.test(normalized)
+  ) {
+    return 0;
+  }
+  const number = Number(normalized);
   return Number.isFinite(number) ? number : 0;
 }
 
@@ -37,14 +49,32 @@ export function validateApplication(application) {
   if (!application.name) errors.push('Your name is required.');
   if (!EMAIL_PATTERN.test(application.email)) errors.push('A valid work email is required.');
   if (!application.company) errors.push('Company is required.');
-  if (!application.teamSize) errors.push('Team size is required.');
-  if (!application.annualRevenue) errors.push('Annual revenue is required.');
-  if (application.opportunitiesPerMonth < 0) errors.push('Opportunity volume is invalid.');
-  if (application.averageContractValue < 0) errors.push('Average contract value is invalid.');
-  if (application.monthlyWorkflowCost < 0) errors.push('Monthly workflow cost is invalid.');
+  if (!TEAM_SIZES.has(application.teamSize)) errors.push('Team size is invalid.');
+  if (!ANNUAL_REVENUES.has(application.annualRevenue)) errors.push('Annual revenue is invalid.');
+  if (
+    !Number.isSafeInteger(application.opportunitiesPerMonth) ||
+    application.opportunitiesPerMonth <= 0 ||
+    application.opportunitiesPerMonth > 10_000
+  ) {
+    errors.push('Opportunity volume is invalid.');
+  }
+  if (
+    !Number.isSafeInteger(application.averageContractValue) ||
+    application.averageContractValue <= 0 ||
+    application.averageContractValue > 100_000_000
+  ) {
+    errors.push('Average contract value is invalid.');
+  }
+  if (
+    !Number.isSafeInteger(application.monthlyWorkflowCost) ||
+    application.monthlyWorkflowCost <= 0 ||
+    application.monthlyWorkflowCost > 1_000_000
+  ) {
+    errors.push('Monthly workflow cost is invalid.');
+  }
   if (!application.systems) errors.push('Current systems are required.');
   if (!application.workflowProblem) errors.push('The current workflow problem is required.');
-  if (!application.startWindow) errors.push('A start window is required.');
+  if (!START_WINDOWS.has(application.startWindow)) errors.push('Start window is invalid.');
   if (application.consent !== 'yes') errors.push('Consent is required.');
   return errors;
 }
@@ -174,6 +204,7 @@ export async function processApplication(input, context = {}, dependencies = {})
   const fetchImpl = dependencies.fetchImpl || fetch;
   const now = dependencies.now || (() => new Date());
   const randomUUID = dependencies.randomUUID || (() => crypto.randomUUID());
+  const rateLimiter = dependencies.rateLimiter || enforceApplicationRateLimit;
   const environment = context.environment || {};
   const application = normalizeApplication(input);
 
@@ -198,6 +229,21 @@ export async function processApplication(input, context = {}, dependencies = {})
   }
 
   requireEnvironment(environment);
+  const rateLimit = await rateLimiter({
+    database: environment.DB,
+    salt: environment.RATE_LIMIT_SALT,
+    clientAddress: cleanText(context.clientAddress, 200),
+    now: now(),
+  });
+  if (!rateLimit.allowed) {
+    return {
+      ok: false,
+      status: 429,
+      error: 'Too many application attempts. Please try again later.',
+      retryAfterSeconds: rateLimit.retryAfterSeconds,
+    };
+  }
+
   const receivedAt = now().toISOString();
   const applicationId = `galt_${receivedAt.slice(0, 10).replaceAll('-', '')}_${randomUUID().slice(0, 8)}`;
   const fit = assessIcpFit(application);
@@ -275,14 +321,22 @@ export async function applicationRequest(request, environment) {
       source: request.headers.get('referer') || '/galt',
       distinctId: request.headers.get('x-posthog-distinct-id'),
       sessionId: request.headers.get('x-posthog-session-id'),
+      clientAddress:
+        request.headers.get('cf-connecting-ip') ||
+        request.headers.get('x-forwarded-for')?.split(',')[0]?.trim(),
     });
+
+    const responseHeaders = {
+      'Cache-Control': 'no-store',
+      ...corsHeaders(request),
+    };
+    if (result.status === 429 && result.retryAfterSeconds) {
+      responseHeaders['Retry-After'] = String(result.retryAfterSeconds);
+    }
 
     return Response.json(result, {
       status: result.status || (result.ok ? 201 : 400),
-      headers: {
-        'Cache-Control': 'no-store',
-        ...corsHeaders(request),
-      },
+      headers: responseHeaders,
     });
   } catch (error) {
     console.error('Application delivery failed', error);

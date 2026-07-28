@@ -23,6 +23,14 @@ const worker = {
       return operatorConfigResponse(environment, request);
     }
 
+    if (
+      url.hostname === 'operator.autonomousai.company' &&
+      url.pathname === '/'
+    ) {
+      url.pathname = '/galt/';
+      return Response.redirect(url, 308);
+    }
+
     if (url.pathname === '/operator' || url.pathname === '/operator/') {
       url.pathname = '/galt/';
       return Response.redirect(url, 308);

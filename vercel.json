@@ -4,8 +4,13 @@
   "installCommand": "npm install",
   "redirects": [
     {
+      "source": "/galt",
+      "destination": "https://operator.autonomousai.company/galt/",
+      "permanent": false
+    },
+    {
       "source": "/operator",
-      "destination": "/galt",
+      "destination": "https://operator.autonomousai.company/galt/",
       "permanent": false
     }
   ]

@@ -38,6 +38,21 @@ test('states the exact ICP, exclusions and acceptance contract', async () => {
   assert.match(html, /≥60%/);
   assert.match(html, /≤\$5/);
   assert.match(html, /Zero[\s\S]*unauthorized external actions/);
+  assert.match(html, /No custom UI; separately scoped if required/);
+});
+
+test('requires durable throttling before applications can trigger notifications', async () => {
+  const hosting = JSON.parse(await text('.openai/hosting.json'));
+  const server = await text('server/application-service.mjs');
+  const limiter = await text('server/rate-limit.mjs');
+  const migration = await text('drizzle/0000_application_rate_limits.sql');
+
+  assert.equal(hosting.d1, 'DB');
+  assert.match(server, /enforceApplicationRateLimit/);
+  assert.match(limiter, /MAX_ATTEMPTS = 3/);
+  assert.match(limiter, /15 \* 60 \* 1_000/);
+  assert.match(limiter, /SHA-256/);
+  assert.match(migration, /application_rate_limits/);
 });
 
 test('ships a five-minute proof with input, output, gate and receipts', async () => {
@@ -68,19 +83,39 @@ test('defines the three requested funnel events and a server-confirmed conversio
   assert.match(server, /notificationReceipt/);
 });
 
-test('keeps /galt canonical and redirects /operator', async () => {
+test('uses the operator subdomain as canonical and redirects both entry paths', async () => {
   const html = await text('public/galt/index.html');
   const vercel = JSON.parse(await text('vercel.json'));
   const worker = await text('worker/index.mjs');
 
-  assert.match(html, /rel="canonical" href="https:\/\/autonomousai\.company\/galt"/);
+  assert.match(
+    html,
+    /rel="canonical" href="https:\/\/operator\.autonomousai\.company\/galt\/"/,
+  );
   assert.deepEqual(vercel.redirects, [
     {
+      source: '/galt',
+      destination: 'https://operator.autonomousai.company/galt/',
+      permanent: false,
+    },
+    {
       source: '/operator',
-      destination: '/galt',
+      destination: 'https://operator.autonomousai.company/galt/',
       permanent: false,
     },
   ]);
+  assert.match(worker, /url\.hostname === 'operator\.autonomousai\.company'/);
   assert.match(worker, /url\.pathname === '\/operator'/);
   assert.match(worker, /url\.pathname === '\/galt'/);
+});
+
+test('keeps the durable operator service as the only application write backend', async () => {
+  const adapter = await text('api/application.js');
+
+  assert.match(
+    adapter,
+    /https:\/\/operator\.autonomousai\.company\/api\/application/,
+  );
+  assert.match(adapter, /status\(307\)/);
+  assert.doesNotMatch(adapter, /processApplication/);
 });
