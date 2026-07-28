@@ -24,17 +24,32 @@ async function pngDimensions(path) {
 
 test('ships a concise thesis-led company landing page', async () => {
   const html = await fileText('index.html');
+  const main = html.match(/<main[^>]*>([\s\S]*?)<\/main>/i)?.[1] ?? '';
+  const visibleWords = main
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/[→↺·]/g, ' ')
+    .trim()
+    .split(/\s+/)
+    .filter((word) => word && !/^\d+$/.test(word));
 
-  assert.match(html, /From companies with fewer people/i);
-  assert.match(html, /to one-person companies/i);
-  assert.match(html, /zero standing employees/i);
+  assert.match(html, /Companies with fewer people\./i);
+  assert.match(html, /One-person companies\./i);
+  assert.match(html, /Zero standing employees\./i);
   assert.match(html, /Not because people lack value/i);
+  assert.match(html, /Work has always been a proxy for value creation/i);
   assert.match(html, /href="\.\/thesis\/"/);
+  assert.match(html, /Close valuable loops\./);
   assert.match(html, /Software has been solved\./);
-  assert.match(html, /scientific verification cheaper, faster and increasingly autonomous/i);
+  assert.match(html, /Verification is next\./);
   assert.match(html, /contract research organizations/i);
-  assert.match(html, /Zero people describes the direction, not the objective\./);
-  assert.match(html, /which valuable loops can we close first\?/i);
+  assert.match(html, /Zero people is the direction\. Value creation is the objective\./);
+  assert.match(html, /Eventually, everything delegated\./);
+  assert.match(html, /Except judgement\./);
+  assert.match(html, /data-motion-group="hero"/);
+  assert.match(html, /data-motion-group="loop"/);
+  assert.match(html, /data-motion-group="frontiers"/);
+  assert.match(html, /data-motion-group="company-path"/);
+  assert.ok(visibleWords.length <= 175, `landing copy should stay punchy; found ${visibleWords.length} words`);
   assert.doesNotMatch(html, /Sam Altman recently/i);
   assert.doesNotMatch(html, /Primary sources/i);
 });
@@ -62,6 +77,7 @@ test('publishes the complete founder thesis as a dedicated whitepaper', async ()
 
 test('restores the local WebGL field without the obsolete handoff runtime', async () => {
   const html = await fileText('index.html');
+  const thesis = await fileText('thesis/index.html');
   const css = await fileText('styles.css');
   const js = await fileText('site.js');
   const gpu = await fileText('gpu-background.js');
@@ -78,10 +94,15 @@ test('restores the local WebGL field without the obsolete handoff runtime', asyn
   assert.doesNotMatch(html, /class Component extends DCLogic/);
   assert.doesNotMatch(html, /this field is live inference/i);
   assert.doesNotMatch(html, /tokens reasoned/i);
+  assert.match(html, /class="brand__name">The Autonomous AI Company<\/span>/);
+  assert.match(thesis, /class="brand__name">The Autonomous AI Company<\/span>/);
+  assert.doesNotMatch(html, /class="brand__wordmark"/);
+  assert.doesNotMatch(thesis, /class="brand__wordmark"/);
   assert.match(css, /prefers-reduced-motion/);
   assert.match(css, /:focus-visible/);
   assert.match(css, /oklch\(/);
   assert.match(js, /IntersectionObserver/);
+  assert.match(html, /classList\.add\(['"]motion-enabled['"]\)/);
   assert.match(gpu, /getContext\(['"]webgl['"]/);
   assert.match(gpu, /gl\.FRAGMENT_SHADER/);
   assert.match(gpu, /requestAnimationFrame/);

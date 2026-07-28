@@ -23,6 +23,14 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Azeret+Mono:wght@400;500;600&family=Saira:wght@400;500;600;700&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <script>
+    if (!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+      document.documentElement.classList.add('motion-enabled');
+      window.__taicMotionFallback = window.setTimeout(() => {
+        document.documentElement.classList.remove('motion-enabled');
+      }, 2500);
+    }
+  </script>
   <link rel="stylesheet" href="./styles.css">
   <script src="./site.js" defer></script>
   <script src="./gpu-background.js" defer></script>
@@ -54,140 +62,159 @@
   <header class="site-header">
     <a class="brand" href="#top" aria-label="The Autonomous AI Company, home">
       <img class="brand__mark" src="./logo-mark.svg" alt="">
-      <img class="brand__wordmark" src="./wordmark-white.png" alt="The Autonomous AI Company">
+      <span class="brand__name">The Autonomous AI Company</span>
     </a>
 
     <nav class="site-nav" aria-label="Primary navigation">
-      <a href="#model">The model</a>
+      <a href="#model">The loop</a>
+      <a href="#frontiers">Frontiers</a>
       <a href="#company">The company</a>
-      <a href="./thesis/">Whitepaper</a>
     </nav>
 
-    <a class="header-action" href="./thesis/">Read the thesis</a>
+    <a class="header-action" href="./thesis/">
+      <span class="header-action__long">Read the thesis</span>
+      <span class="header-action__short">Thesis</span>
+    </a>
   </header>
 
   <main id="main-content">
     <section class="hero" id="top" data-field-state="hero" aria-labelledby="hero-title">
-      <div class="hero__inner">
-        <p class="eyebrow">A founder-led, agent-operated company</p>
-        <h1 id="hero-title">
-          From companies with fewer people,
-          <span>to one-person companies,</span>
-          <strong>to companies with zero standing employees.</strong>
+      <div class="hero__inner" data-motion-group="hero">
+        <p class="eyebrow" data-motion-item style="--step: 0">A founder-led, agent-operated company</p>
+        <h1
+          class="hero-sequence"
+          id="hero-title"
+          aria-label="From companies with fewer people, to one-person companies, to companies with zero standing employees."
+        >
+          <span class="hero-stage hero-stage--fewer" data-motion-item style="--step: 1" aria-hidden="true">
+            <span class="hero-stage__index">01</span>
+            <span class="hero-stage__copy">Companies with fewer people.</span>
+          </span>
+          <span class="hero-stage hero-stage--one" data-motion-item style="--step: 2" aria-hidden="true">
+            <span class="hero-stage__index">02</span>
+            <span class="hero-stage__copy">One-person companies.</span>
+          </span>
+          <span class="hero-stage hero-stage--zero" data-motion-item style="--step: 3" aria-hidden="true">
+            <span class="hero-stage__index">03</span>
+            <span class="hero-stage__copy">Zero standing employees.</span>
+          </span>
         </h1>
-        <p class="hero__lead">
-          Not because people lack value, but because work has always been a proxy for value creation. AI changes that mechanism.
-        </p>
-        <p class="hero__guardrail">
-          Zero people describes the direction, not the objective. The objective remains value creation.
-        </p>
-        <div class="hero__actions">
-          <a class="button button--primary" href="./thesis/">Read the whitepaper</a>
-          <a class="button button--quiet" href="https://github.com/dante-perea" target="_blank" rel="noreferrer">See what I’m building</a>
+
+        <div class="hero__statement" data-motion-item style="--step: 4">
+          <p class="hero__lead">
+            Not because people lack value. Work has always been a proxy for value creation. AI changes that mechanism.
+          </p>
+          <p class="hero__guardrail">
+            Zero people is the direction. Value creation is the objective.
+          </p>
+          <a class="button button--primary" href="./thesis/">Read the thesis</a>
         </div>
       </div>
 
       <div class="render-label" aria-hidden="true">
         <span></span>
-        WebGL field · rendered on this device
+        Local WebGL
       </div>
-      <a class="scroll-cue" href="#model">The model <span aria-hidden="true">↓</span></a>
+      <a class="scroll-cue" href="#model">The loop <span aria-hidden="true">↓</span></a>
     </section>
 
     <section class="mechanism-section" id="model" data-field-state="mechanism" aria-labelledby="mechanism-title">
-      <div class="section-heading">
-        <p class="section-number">01</p>
-        <h2 id="mechanism-title">The cost of turning intention into valuable output is collapsing.</h2>
-      </div>
+      <div class="section-frame" data-motion-group="loop">
+        <div class="section-heading">
+          <p class="section-number" data-motion-item style="--step: 0">01 · The model</p>
+          <h2 id="mechanism-title" data-motion-item style="--step: 1">Close valuable loops.</h2>
+        </div>
 
-      <div class="loop-line" aria-label="The value creation loop">
-        <span>Intention</span>
-        <i aria-hidden="true">→</i>
-        <span>Execution</span>
-        <i aria-hidden="true">→</i>
-        <span>Validation</span>
-        <i aria-hidden="true">→</i>
-        <span>Value</span>
-        <i aria-hidden="true">↺</i>
-      </div>
+        <ol class="value-loop" aria-label="Intention, execution, validation, value">
+          <li data-motion-item style="--step: 2; --node: 0">
+            <span>01</span>
+            <strong>Intention</strong>
+          </li>
+          <li data-motion-item style="--step: 3; --node: 1">
+            <span>02</span>
+            <strong>Execution</strong>
+          </li>
+          <li data-motion-item style="--step: 4; --node: 2">
+            <span>03</span>
+            <strong>Validation</strong>
+          </li>
+          <li data-motion-item style="--step: 5; --node: 3">
+            <span>04</span>
+            <strong>Value</strong>
+          </li>
+        </ol>
 
-      <p class="mechanism-copy">
-        As the range of outcomes AI can produce expands, the useful unit is not a job replaced. It is a valuable loop closed.
-      </p>
+        <p class="mechanism-copy" data-motion-item style="--step: 6">
+          AI is collapsing the cost of turning intention into valuable output. Which valuable loop can we close first?
+        </p>
+      </div>
     </section>
 
     <section class="frontiers-section" id="frontiers" data-field-state="frontiers" aria-labelledby="frontiers-title">
-      <div class="section-heading section-heading--compact">
-        <p class="section-number">02</p>
-        <h2 id="frontiers-title">Two frontiers</h2>
-      </div>
+      <div class="section-frame" data-motion-group="frontiers">
+        <div class="section-heading section-heading--compact">
+          <p class="section-number" data-motion-item style="--step: 0">02</p>
+          <h2 id="frontiers-title" data-motion-item style="--step: 1">Two frontiers.</h2>
+        </div>
 
-      <div class="frontier-row">
-        <article>
-          <p class="frontier-label">Applications</p>
-          <h3>Software has been solved.</h3>
-          <p>
-            Not because every application exists or engineering no longer matters. A workflow represented and verified in software can increasingly move from AI-assisted, to automated, to autonomous.
-          </p>
-        </article>
+        <div class="frontier-row">
+          <article data-motion-item style="--step: 2">
+            <p class="frontier-label">Applications</p>
+            <h3>Software has been solved.</h3>
+            <p>
+              Engineering still matters. Workflows represented and verified in software can move toward autonomy.
+            </p>
+          </article>
 
-        <article>
-          <p class="frontier-label">Research</p>
-          <h3>Verification is the frontier.</h3>
-          <p>
-            The next frontier is making scientific verification cheaper, faster and increasingly autonomous.
-          </p>
-        </article>
+          <article data-motion-item style="--step: 3">
+            <p class="frontier-label">Research</p>
+            <h3>Verification is next.</h3>
+            <p>
+              Make scientific verification cheaper, faster and increasingly autonomous.
+            </p>
+          </article>
+        </div>
       </div>
     </section>
 
     <section class="company-section" id="company" data-field-state="company" aria-labelledby="company-title">
-      <div class="company-statement">
-        <p class="section-number">03</p>
-        <h2 id="company-title">The Autonomous AI Company is my exploration function for this future.</h2>
+      <div class="section-frame company-frame" data-motion-group="company-path">
+        <div class="company-statement">
+          <p class="section-number" data-motion-item style="--step: 0">03 · The company</p>
+          <h2 id="company-title" data-motion-item style="--step: 1">My exploration function.</h2>
+        </div>
+
+        <ol class="company-path" aria-label="Company, contract research organizations, lab">
+          <li data-motion-item style="--step: 2">
+            <span>Now</span>
+            <strong>Zero-people company</strong>
+          </li>
+          <li data-motion-item style="--step: 3">
+            <span>Next</span>
+            <strong>Zero-people contract research organizations</strong>
+          </li>
+          <li data-motion-item style="--step: 4">
+            <span>Frontier</span>
+            <strong>Zero-people lab</strong>
+          </li>
+        </ol>
       </div>
 
-      <ol class="company-path" aria-label="The company’s exploration path">
-        <li>
-          <span>Now</span>
-          <strong>Zero-people companies</strong>
-        </li>
-        <li>
-          <span>Next</span>
-          <strong>Zero-people contract research organizations</strong>
-        </li>
-        <li>
-          <span>Frontier</span>
-          <strong>Zero-people labs</strong>
-        </li>
-      </ol>
-
-      <div class="founder-boundary">
-        <p>
-          The AI Native Founder does not disappear. They decide which outcomes matter, establish boundaries and remain accountable for irreversible decisions.
+      <div class="founder-boundary" data-motion-group="founder-boundary">
+        <p class="founder-boundary__statement" data-motion-item style="--step: 0">
+          Eventually, everything delegated.
+          <strong>Except judgement.</strong>
         </p>
-        <dl>
-          <div>
-            <dt>Delegate</dt>
-            <dd>Execution · iteration · validated routines</dd>
-          </div>
-          <div>
-            <dt>Retain</dt>
-            <dd>Judgement · boundaries · accountability</dd>
-          </div>
-        </dl>
-      </div>
-    </section>
 
-    <section class="closing-section" id="first-move" data-field-state="closing" aria-labelledby="closing-title">
-      <p class="eyebrow">The first move</p>
-      <h2 id="closing-title">Which valuable loops can we close first?</h2>
-      <p>
-        Identify a valuable outcome. Close its execution-validation loop. Make verification cheap. Then build distribution and feedback around it.
-      </p>
-      <div class="closing-actions">
-        <a class="button button--primary" href="./thesis/">Read the full whitepaper</a>
-        <a class="text-link" href="#top">Return to the beginning <span aria-hidden="true">↑</span></a>
+        <div class="founder-boundary__detail" data-motion-item style="--step: 1">
+          <p>
+            The founder chooses outcomes, sets boundaries and remains accountable for irreversible decisions.
+          </p>
+          <p class="first-move">
+            Close a valuable loop. Make verification cheap. Build distribution and feedback.
+          </p>
+          <a class="button button--primary" href="./thesis/">Read the full whitepaper</a>
+        </div>
       </div>
     </section>
   </main>

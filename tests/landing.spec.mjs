@@ -7,17 +7,104 @@ test('presents a succinct company overview derived from the thesis', async ({ pa
   await expect(
     page.getByRole('heading', {
       level: 1,
-      name: /companies with fewer people.*one-person companies.*zero standing employees/i,
+      name: /from companies with fewer people.*one-person companies.*zero standing employees/i,
     }),
   ).toBeVisible();
   await expect(page.getByText(/Not because people lack value/i)).toBeVisible();
-  await expect(page.getByRole('link', { name: /Read the whitepaper/i }).first()).toHaveAttribute(
+  await expect(page.getByRole('link', { name: /Read the thesis/i }).first()).toHaveAttribute(
     'href',
     './thesis/',
   );
   await expect(page.getByRole('heading', { name: 'Software has been solved.' })).toBeVisible();
-  await expect(page.getByText(/The next frontier is making scientific verification/i)).toBeVisible();
-  await expect(page.getByText(/Zero people describes the direction, not the objective/i)).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Verification is next.' })).toBeVisible();
+  await expect(page.getByText(/Zero people is the direction.*Value creation is the objective/i)).toBeVisible();
+  await expect(page.getByText(/Everything delegated/i)).toBeVisible();
+  await expect(page.getByText(/Except judgement/i)).toBeVisible();
+});
+
+test('keeps the brand lockup on one horizontal line', async ({ page }) => {
+  for (const viewport of [
+    { width: 320, height: 720 },
+    { width: 360, height: 800 },
+    { width: 393, height: 852 },
+    { width: 768, height: 900 },
+    { width: 1024, height: 768 },
+    { width: 1440, height: 900 },
+    { width: 1728, height: 995 },
+  ]) {
+    await page.setViewportSize(viewport);
+
+    for (const path of ['/', '/thesis/']) {
+      await page.goto(path);
+      const lockup = await page.locator('.brand__name').evaluate((element) => {
+        const styles = getComputedStyle(element);
+        const bounds = element.getBoundingClientRect();
+        return {
+          height: bounds.height,
+          lineHeight: Number.parseFloat(styles.lineHeight),
+          whiteSpace: styles.whiteSpace,
+        };
+      });
+
+      expect(lockup.whiteSpace).toBe('nowrap');
+      expect(lockup.height).toBeLessThanOrEqual(lockup.lineHeight * 1.15);
+    }
+  }
+});
+
+test('composes the landing as four narrative screens', async ({ page }) => {
+  await page.setViewportSize({ width: 1728, height: 995 });
+  await page.goto('/');
+
+  const screens = await page.locator('main > section').evaluateAll((sections) =>
+    sections.map((section) => ({
+      id: section.id,
+      height: section.getBoundingClientRect().height,
+    })),
+  );
+
+  expect(screens.map((screen) => screen.id)).toEqual(['top', 'model', 'frontiers', 'company']);
+  for (const screen of screens) {
+    expect(screen.height, `${screen.id} should read as one screen`).toBeGreaterThanOrEqual(850);
+    expect(screen.height, `${screen.id} should not become a long essay`).toBeLessThanOrEqual(1100);
+  }
+});
+
+test('orchestrates each landing argument as a one-shot motion group', async ({ page }) => {
+  await page.goto('/');
+
+  for (const name of ['hero', 'loop', 'frontiers', 'company-path', 'founder-boundary']) {
+    const group = page.locator(`[data-motion-group="${name}"]`);
+    await group.scrollIntoViewIfNeeded();
+    await expect(group).toHaveClass(/is-visible/);
+  }
+});
+
+test('does not animate offscreen sections during GPU startup', async ({ page }) => {
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
+  await page.waitForTimeout(100);
+
+  const activeGroups = await page.evaluate(() =>
+    document
+      .getAnimations()
+      .filter((animation) => animation.playState === 'running')
+      .map((animation) =>
+        animation.effect?.target?.closest?.('[data-motion-group]')?.dataset.motionGroup,
+      )
+      .filter(Boolean),
+  );
+
+  expect([...new Set(activeGroups)]).toEqual(['hero']);
+});
+
+test('fails open if the motion controller cannot load', async ({ page }) => {
+  await page.route('**/site.js', (route) => route.abort());
+  await page.goto('/');
+  await page.waitForTimeout(2700);
+
+  await expect(page.locator('html')).not.toHaveClass(/motion-enabled/);
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Close valuable loops.' })).toBeVisible();
 });
 
 test('restores the GPU field as a rendered visual layer', async ({ page }) => {
@@ -125,8 +212,13 @@ test('publishes the complete thesis and keeps the accountable founder', async ({
 
 test('fits desktop and mobile viewports without horizontal clipping', async ({ page }) => {
   for (const viewport of [
-    { width: 1440, height: 900 },
+    { width: 320, height: 720 },
+    { width: 360, height: 800 },
     { width: 393, height: 852 },
+    { width: 768, height: 900 },
+    { width: 1024, height: 768 },
+    { width: 1440, height: 900 },
+    { width: 1728, height: 995 },
   ]) {
     await page.setViewportSize(viewport);
     for (const path of ['/', '/thesis/']) {
@@ -151,6 +243,13 @@ test('remains readable when motion is reduced', async ({ browser }) => {
   await page.goto('/');
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
   await expect(page.locator('html')).toHaveAttribute('data-motion', 'reduced');
+  await expect(page.locator('html')).not.toHaveClass(/motion-enabled/);
+
+  const motionState = await page.locator('[data-motion-group="hero"]').evaluate((element) => {
+    const styles = getComputedStyle(element);
+    return { opacity: styles.opacity, transform: styles.transform };
+  });
+  expect(motionState).toEqual({ opacity: '1', transform: 'none' });
 
   await context.close();
 });
@@ -164,7 +263,7 @@ test('keeps the complete thesis visible without JavaScript or external fonts', a
   await page.goto('/');
 
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-  await expect(page.getByRole('link', { name: /Read the whitepaper/i }).first()).toBeVisible();
+  await expect(page.getByRole('link', { name: /Read the thesis/i }).first()).toBeVisible();
 
   await page.goto('/thesis/');
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
