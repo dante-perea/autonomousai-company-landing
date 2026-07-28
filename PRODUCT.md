@@ -32,6 +32,9 @@ Provocative, rigorous, accountable. The voice is founder-owned and intellectuall
 4. Keep the founder present. Execution may be delegated; purpose, boundaries, judgment, and accountability remain human.
 5. Preserve the procedural WebGL field as a signature visual. Present it truthfully as a locally rendered atmosphere, never as model inference or evidence of value.
 6. Keep the landing page concise. Supporting arguments, sources, and full prose belong in the whitepaper.
+7. Keep the landing to four narrative screens: progression, value loop, two frontiers, and company path with the founder boundary.
+8. Use motion to explain the thesis. Reveals should show progression, loop closure, frontier separation, and the relay from company to lab.
+9. Keep the company name in one horizontal header lockup at every supported viewport.
 
 ## Accessibility & Inclusion
 
