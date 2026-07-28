@@ -30,15 +30,15 @@ Provocative, rigorous, accountable. The voice is founder-owned and intellectuall
 2. Preserve the user's causal argument and sequence: value creation, collapsing intention-to-output cost, applications, research, TAIC, founder judgment, valuable loops.
 3. Make verification the visual and conceptual spine. Distinguish execution from validation and applications from research.
 4. Keep the founder present. Execution may be delegated; purpose, boundaries, judgment, and accountability remain human.
-5. Preserve the procedural WebGL field as a signature visual. Present it truthfully as a locally rendered atmosphere, never as model inference or evidence of value.
+5. Preserve the GPU-rendered world as a signature visual. Present it truthfully as a locally rendered metaphor, never as model inference or evidence of value.
 6. Keep the landing page concise. Supporting arguments, sources, and full prose belong in the whitepaper.
-7. Keep the landing to four concise chapters: progression, value loop, two frontiers, and company path. Give the founder accountability boundary its own final frame inside the company chapter.
-8. Use motion to explain the thesis. Reveals should show progression, loop closure, frontier separation, and the relay from company to lab.
+7. Tell the landing in six concise beats: intention, execution, verification, applications and research, company to CRO to lab, and founder judgement.
+8. Use motion to explain the thesis. The persistent intent core must be transformed, tested, routed, scaled, and finally handed back to the founder boundary.
 9. Keep the company name in one horizontal header lockup at every supported viewport.
 
 ## Motion Language
 
-The landing is one continuous proof engine, not a collection of effects. A single signal begins at the company mark, moves through intention and execution, crosses a visible verification gate, becomes value, separates into the applications and research frontiers, then scales from company to contract research organization to lab. Warm amber is reserved for founder judgement, boundaries, and accountability; it remains present while operational complexity moves into autonomous loops.
+The landing is one continuous foundry, not a collection of effects. A single intent core enters an execution corridor, crosses a physical verification instrument, splits into applications and research proof channels, assembles nested company, contract research organization, and lab structures, then reaches the founder boundary. Warm amber is reserved for founder judgement and irreversible accountability.
 
 - Ultraviolet represents intention and unverified possibility.
 - Cool white represents execution and measurement.
@@ -51,9 +51,9 @@ The landing is one continuous proof engine, not a collection of effects. A singl
 
 ## Motion Architecture
 
-GSAP ScrollTrigger is the sole narrative clock. It writes one normalized scene state consumed by both the DOM/SVG choreography and the custom renderer. WebGL2 is the preferred renderer, WebGL1 is the compatibility renderer, and the CSS composition is the failure-open fallback. Cross-document navigation stays native because View Transitions produced compositor corruption beside the sticky header and WebGL surface in tested browsers. Three.js, React Three Fiber, WebGPU, and browser inference are not runtime dependencies because this story does not require a 3D scene graph, compute simulation, or model execution.
+GSAP ScrollTrigger is the sole narrative clock. It writes one normalized journey state consumed by both the semantic DOM choreography and a single Three.js world. Lenis only smooths eligible fine-pointer input; it never owns narrative state. One renderer, one camera, and one persistent intent core live for the complete journey. Every authored transform is a pure function of normalized progress, so the film is exactly reversible.
 
-Quality is adaptive and bounded by framebuffer pixels rather than device pixel ratio. Explicit low-power constraints set a persistent quality ceiling, and a failed promotion backs off before trying again. Continuous rendering stops when the page is hidden, changes live with the user's reduced-motion preference, and recovers explicitly after WebGL context restoration. A renderer failure must never hide or block the semantic thesis.
+WebGL2 is preferred and WebGL1 remains compatible. Quality is adaptive and preserves composition and edge fidelity before reducing secondary particles or instance counts. Continuous rendering stops when the page is hidden, changes live with the user's reduced-motion preference, and recovers explicitly after context restoration. A renderer failure must never hide or block the semantic thesis.
 
 ## Accessibility & Inclusion
 

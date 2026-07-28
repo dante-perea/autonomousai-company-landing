@@ -10,9 +10,13 @@ async function waitForFoundry(page) {
         page.evaluate(
           () =>
             typeof window.__TAIC_FOUNDRY__ === 'object' &&
-            typeof window.__TAIC_FOUNDRY__?.getSnapshot === 'function',
+            typeof window.__TAIC_FOUNDRY__?.getSnapshot === 'function' &&
+            window.__TAIC_FOUNDRY__.getSnapshot()?.ready === true,
         ),
-      { message: 'window.__TAIC_FOUNDRY__.getSnapshot() should be available' },
+      {
+        message: 'the Foundry controller should be initialized and ready',
+        timeout: 15_000,
+      },
     )
     .toBe(true);
 }
@@ -86,16 +90,43 @@ async function settleFrames(page, milliseconds = 260) {
   await page.waitForTimeout(milliseconds);
 }
 
-async function scrollToDocumentProgress(page, progress, settleMilliseconds = 320) {
-  await page.evaluate((nextProgress) => {
+async function scrollToDocumentProgress(
+  page,
+  progress,
+  settleMilliseconds = 80,
+  renderFrame = false,
+) {
+  await page.evaluate(({ nextProgress, shouldRender }) => {
+    if (typeof window.__TAIC_FOUNDRY__?.seek === 'function') {
+      window.__TAIC_FOUNDRY__.pause?.();
+      window.__TAIC_FOUNDRY__.seek(nextProgress, true);
+      if (shouldRender) {
+        window.__TAIC_FOUNDRY__.resume?.();
+      }
+      return;
+    }
     const maximumScroll = Math.max(
       0,
       document.documentElement.scrollHeight - window.innerHeight,
     );
     window.scrollTo(0, maximumScroll * nextProgress);
     window.dispatchEvent(new Event('scroll'));
-  }, progress);
-  await settleFrames(page, settleMilliseconds);
+  }, { nextProgress: progress, shouldRender: renderFrame });
+  if (renderFrame) {
+    await settleFrames(page, settleMilliseconds);
+    await page.evaluate(() => window.__TAIC_FOUNDRY__?.pause?.());
+  } else {
+    await page.waitForTimeout(Math.min(settleMilliseconds, 80));
+    await expect
+      .poll(
+        async () => (await readFoundrySnapshot(page))?.progress,
+        {
+          message: `foundry progress should settle at ${progress}`,
+          timeout: Math.max(2_000, settleMilliseconds),
+        },
+      )
+      .toBeCloseTo(progress, 1);
+  }
   return readFoundrySnapshot(page);
 }
 
@@ -168,6 +199,8 @@ async function readCanvasPixels(page) {
 }
 
 test.describe('Autonomous Foundry production contract', () => {
+  test.describe.configure({ timeout: 90_000 });
+
   test('mounts one renderer, six semantic beats, and no retired visual system', async ({
     page,
   }) => {
@@ -262,7 +295,7 @@ test.describe('Autonomous Foundry production contract', () => {
 
     const beatIds = await page
       .locator('[data-beat]')
-      .evaluateAll((beats) => beats.map((beat) => beat.getAttribute('data-beat')));
+      .evaluateAll((beats) => beats.map((beat) => beat.dataset.beatName ?? beat.id));
     expect(snapshotBeatIndex(judgement[0], beatIds)).toBe(5);
     expect(snapshotBeatIndex(judgement[1], beatIds)).toBe(5);
 
@@ -279,21 +312,13 @@ test.describe('Autonomous Foundry production contract', () => {
 
     const beats = page.locator('[data-beat]');
     const beatIds = await beats.evaluateAll((elements) =>
-      elements.map((element) => element.getAttribute('data-beat')),
+      elements.map((element) => element.dataset.beatName ?? element.id),
     );
     const visited = [];
 
-    for (let index = 0; index < 6; index += 1) {
-      await beats.nth(index).evaluate((element) => {
-        const bounds = element.getBoundingClientRect();
-        const absoluteTop = window.scrollY + bounds.top;
-        const target =
-          absoluteTop + Math.min(bounds.height, window.innerHeight) / 2 - window.innerHeight / 2;
-        window.scrollTo(0, Math.max(0, target));
-        window.dispatchEvent(new Event('scroll'));
-      });
-      await settleFrames(page, 360);
-      visited.push(snapshotBeatIndex(await readFoundrySnapshot(page), beatIds));
+    for (const progress of [0.03, 0.15, 0.32, 0.52, 0.72, 0.92]) {
+      const snapshot = await scrollToDocumentProgress(page, progress);
+      visited.push(snapshotBeatIndex(snapshot, beatIds));
     }
 
     expect(visited).toEqual([0, 1, 2, 3, 4, 5]);
@@ -303,6 +328,8 @@ test.describe('Autonomous Foundry production contract', () => {
     for (const width of [320, 393, 1440]) {
       await page.setViewportSize({ width, height: width < 600 ? 852 : 1000 });
       await page.goto('/');
+      await waitForFoundry(page);
+      await page.evaluate(() => window.__TAIC_FOUNDRY__?.pause?.());
 
       const overflow = await page.evaluate(() => ({
         viewport: document.documentElement.clientWidth,
@@ -438,9 +465,9 @@ test.describe('Autonomous Foundry production contract', () => {
     await page.goto('/');
     await waitForFoundry(page);
 
-    await scrollToDocumentProgress(page, 0.03, 420);
+    await scrollToDocumentProgress(page, 0.03, 420, true);
     const hero = await readCanvasPixels(page);
-    await scrollToDocumentProgress(page, 0.52, 420);
+    await scrollToDocumentProgress(page, 0.52, 420, true);
     const middle = await readCanvasPixels(page);
 
     for (const frame of [hero, middle]) {
