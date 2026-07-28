@@ -4,12 +4,42 @@ import { storyStageAt } from './foundry-story.js';
 
 const MAX_NODES = 192;
 const MAX_LINKS = 240;
+const DENSITY_COUNT = 6000;
 const Y_AXIS = new THREE.Vector3(0, 1, 0);
+const HUMAN_CHEST_Y = 0.62;
+const HUMAN_CHEST_Z = 0.42;
+const HUMAN_WITNESS_REGIONS = Object.freeze([
+  'head',
+  'torso',
+  'left-arm',
+  'right-arm',
+  'left-leg',
+  'right-leg',
+  'shoulder',
+  'pelvis',
+  'head',
+  'torso',
+  'left-leg',
+  'right-leg',
+  'neck',
+]);
 
 const QUALITY_LEVELS = Object.freeze({
-  low: Object.freeze({ nodeCount: 72, linkCount: 84 }),
-  balanced: Object.freeze({ nodeCount: 128, linkCount: 160 }),
-  high: Object.freeze({ nodeCount: 192, linkCount: 240 }),
+  low: Object.freeze({
+    nodeCount: 72,
+    linkCount: 84,
+    densityCount: 2400,
+  }),
+  balanced: Object.freeze({
+    nodeCount: 128,
+    linkCount: 160,
+    densityCount: 4200,
+  }),
+  high: Object.freeze({
+    nodeCount: 192,
+    linkCount: 240,
+    densityCount: 6000,
+  }),
 });
 
 const STAGE_NAMES = Object.freeze([
@@ -26,7 +56,7 @@ const TRANSITIONS = Object.freeze([
   Object.freeze({ from: 1, to: 2, start: 0.265, end: 0.315 }),
   Object.freeze({ from: 2, to: 3, start: 0.405, end: 0.465 }),
   Object.freeze({ from: 3, to: 4, start: 0.585, end: 0.645 }),
-  Object.freeze({ from: 4, to: 5, start: 0.785, end: 0.845 }),
+  Object.freeze({ from: 4, to: 5, start: 0.742, end: 0.802 }),
 ]);
 
 const DEFAULT_PALETTE = Object.freeze({
@@ -55,6 +85,9 @@ const seeded = (index, salt = 0) => {
   const value = Math.sin(index * 91.173 + salt * 47.711) * 43758.5453123;
   return value - Math.floor(value);
 };
+
+const humanSampleProgress = (ordinal) =>
+  (0.5 + ordinal * 0.618033988749895) % 1;
 
 const setTarget = (target, index, x, y, z) => {
   const offset = index * 3;
@@ -164,17 +197,100 @@ const buildStageTargets = () => {
     );
   }
 
-  const boundary = targets[5];
+  const humanWitness = targets[5];
+  /*
+   * The final target is an embodied human witness: head, shoulder, torso,
+   * relaxed arm, pelvis, and separated leg regions are interleaved so even
+   * the 72-node quality tier preserves the complete silhouette.
+   */
+  const humanRegionSequence = HUMAN_WITNESS_REGIONS;
+  const humanRegionTotals = new Map();
+  const humanRegionOrdinals = new Map();
   for (let index = 0; index < MAX_NODES; index += 1) {
-    const ring = Math.floor(Math.sqrt(index));
-    const angle = index * 2.399963229728653;
-    const radius = Math.min(2.65, 0.18 + ring * 0.2);
+    const region = humanRegionSequence[index % humanRegionSequence.length];
+    humanRegionTotals.set(region, (humanRegionTotals.get(region) ?? 0) + 1);
+  }
+
+  for (let index = 0; index < MAX_NODES; index += 1) {
+    const region = humanRegionSequence[index % humanRegionSequence.length];
+    const ordinal = humanRegionOrdinals.get(region) ?? 0;
+    humanRegionOrdinals.set(region, ordinal + 1);
+    const total = humanRegionTotals.get(region) ?? 1;
+    const progress = humanSampleProgress(ordinal);
+    const spiral = ordinal * 2.399963229728653;
+    let x = 0;
+    let y = 0;
+    let z = 0;
+
+    if (region === 'head') {
+      const vertical = 1 - progress * 2;
+      const radial = Math.sqrt(Math.max(0, 1 - vertical * vertical));
+      const headAngle = seeded(index, 63) * Math.PI * 2;
+      x = Math.cos(headAngle) * radial * 0.92;
+      y = 3.22 + vertical * 1.08;
+      z = Math.sin(headAngle) * radial * 0.62;
+    } else if (region === 'neck') {
+      const side = ordinal % 2 === 0 ? -1 : 1;
+      const row = Math.floor(ordinal / 2);
+      const rows = Math.ceil(total / 2);
+      x = side * (0.3 + seeded(index, 61) * 0.08);
+      y = 1.83 + ((row + 0.5) / rows) * 0.52;
+      z = (seeded(index, 62) - 0.5) * 0.42;
+    } else if (region === 'shoulder') {
+      x = (progress - 0.5) * 3.18;
+      y =
+        1.82 -
+        Math.abs(x) * 0.09 +
+        (x < 0 ? -0.07 : 0.03);
+      z = Math.sin(spiral) * 0.38;
+    } else if (region === 'torso') {
+      const vertical = progress;
+      const halfWidth =
+        vertical < 0.7
+          ? 1.5 - vertical * 0.92
+          : 0.86 + (vertical - 0.7) * 0.68;
+      x = Math.cos(spiral) * halfWidth;
+      y = 1.72 - vertical * 2.78;
+      z = Math.sin(spiral) * 0.54;
+    } else if (region === 'pelvis') {
+      const angle = progress * Math.PI * 2;
+      x = Math.cos(angle) * 1.08;
+      y = -1.18 + Math.sin(angle) * 0.62;
+      z = Math.sin(spiral) * 0.42;
+    } else {
+      const side = region.startsWith('left') ? -1 : 1;
+      const radialX = Math.cos(spiral);
+      const radialZ = Math.sin(spiral);
+
+      if (region.endsWith('arm')) {
+        const bend = Math.sin(progress * Math.PI);
+        const radius = 0.3 - progress * 0.11;
+        x =
+          side * (1.46 + progress * 0.88 + bend * 0.18) +
+          radialX * radius;
+        y =
+          1.54 -
+          progress * 2.84 +
+          radialX * radius * 0.18 +
+          (side < 0 ? -0.1 : 0.04 * bend);
+        z = radialZ * radius;
+      } else {
+        const bend = Math.sin(progress * Math.PI);
+        const radius = 0.4 - progress * 0.16;
+        x =
+          side * (0.62 + progress * 0.35 + bend * 0.1) +
+          radialX * radius;
+        y = -1.42 - progress * 3.72;
+        z = radialZ * radius * 0.88;
+      }
+    }
+
     setTarget(
-      boundary,
+      humanWitness,
       index,
-      Math.cos(angle) * radius * 0.78,
-      Math.sin(angle) * radius,
-      -0.05 - seeded(index, 31) * 0.55,
+      x,
+      y,
+      z,
     );
   }
 
@@ -194,6 +310,22 @@ const addPair = (set, from, to) => {
   set.pairs[offset] = from % MAX_NODES;
   set.pairs[offset + 1] = to % MAX_NODES;
   set.count += 1;
+};
+
+const sortPairsByMaximumIndex = (set) => {
+  const ordered = Array.from({ length: set.count }, (_, index) => {
+    const offset = index * 2;
+    return [set.pairs[offset], set.pairs[offset + 1]];
+  }).sort(
+    (left, right) =>
+      Math.max(left[0], left[1]) - Math.max(right[0], right[1]),
+  );
+
+  for (let index = 0; index < ordered.length; index += 1) {
+    const offset = index * 2;
+    set.pairs[offset] = ordered[index][0];
+    set.pairs[offset + 1] = ordered[index][1];
+  }
 };
 
 const buildPairSets = () => {
@@ -268,12 +400,79 @@ const buildPairSets = () => {
     }
   }
 
-  for (let index = 1; index < 128; index += 1) {
-    addPair(structural[5], index, Math.floor((index - 1) / 2));
+  const witnessNodesByRegion = new Map();
+  for (let index = 0; index < MAX_NODES; index += 1) {
+    const region =
+      HUMAN_WITNESS_REGIONS[index % HUMAN_WITNESS_REGIONS.length];
+    const regionNodes = witnessNodesByRegion.get(region) ?? [];
+    regionNodes.push(index);
+    witnessNodesByRegion.set(region, regionNodes);
   }
-  for (let index = 0; index < 48; index += 1) {
-    addPair(feedback[5], index, (index * 7 + 19) % 96);
+
+  const addRegionBridges = (
+    set,
+    fromRegion,
+    toRegion,
+    stride = 3,
+  ) => {
+    const fromNodes = witnessNodesByRegion.get(fromRegion) ?? [];
+    const toNodes = witnessNodesByRegion.get(toRegion) ?? [];
+    const count = Math.min(fromNodes.length, toNodes.length);
+    for (let index = 0; index < count; index += stride) {
+      addPair(set, fromNodes[index], toNodes[index]);
+    }
+  };
+
+  /*
+   * Anatomical bridges are written first so the 84-link low tier always keeps
+   * the complete head-to-feet chain before secondary surface connections.
+   */
+  addRegionBridges(structural[5], 'head', 'neck', 100);
+  addRegionBridges(structural[5], 'neck', 'shoulder', 6);
+  addRegionBridges(structural[5], 'shoulder', 'torso', 6);
+  addRegionBridges(structural[5], 'shoulder', 'left-arm', 6);
+  addRegionBridges(structural[5], 'shoulder', 'right-arm', 6);
+  addRegionBridges(structural[5], 'torso', 'pelvis', 6);
+  addRegionBridges(structural[5], 'pelvis', 'left-leg', 6);
+  addRegionBridges(structural[5], 'pelvis', 'right-leg', 6);
+
+  const chainedPairs = new Set();
+  for (const tierLimit of [72, 128, MAX_NODES]) {
+    for (const [region, regionNodes] of witnessNodesByRegion.entries()) {
+      if (region === 'head') {
+        continue;
+      }
+      const orderedNodes = regionNodes
+        .map((node, ordinal) => ({
+          node,
+          progress: humanSampleProgress(ordinal),
+        }))
+        .filter(({ node }) => node < tierLimit)
+        .sort((left, right) => left.progress - right.progress);
+      for (let index = 1; index < orderedNodes.length; index += 1) {
+        const from = orderedNodes[index - 1].node;
+        const to = orderedNodes[index].node;
+        const key = `${Math.min(from, to)}:${Math.max(from, to)}`;
+        if (chainedPairs.has(key)) {
+          continue;
+        }
+        chainedPairs.add(key);
+        addPair(structural[5], from, to);
+      }
+    }
   }
+
+  addRegionBridges(feedback[5], 'shoulder', 'torso', 4);
+  addRegionBridges(feedback[5], 'torso', 'pelvis', 4);
+  addRegionBridges(feedback[5], 'pelvis', 'left-leg', 5);
+  addRegionBridges(feedback[5], 'pelvis', 'right-leg', 5);
+
+  const torsoNodes = witnessNodesByRegion.get('torso') ?? [];
+  for (let index = 2; index < torsoNodes.length; index += 4) {
+    addPair(feedback[5], torsoNodes[0], torsoNodes[index]);
+  }
+  sortPairsByMaximumIndex(structural[5]);
+  sortPairsByMaximumIndex(feedback[5]);
 
   return { structural, feedback };
 };
@@ -380,6 +579,242 @@ const createPhaseCurve = () =>
     0.42,
   );
 
+const createEllipseGeometry = (radiusX, radiusY, segments = 128) => {
+  const positions = new Float32Array(segments * 3);
+  for (let index = 0; index < segments; index += 1) {
+    const angle = (index / segments) * Math.PI * 2;
+    const offset = index * 3;
+    positions[offset] = Math.cos(angle) * radiusX;
+    positions[offset + 1] = Math.sin(angle) * radiusY;
+    positions[offset + 2] = 0;
+  }
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute(
+    'position',
+    new THREE.BufferAttribute(positions, 3),
+  );
+  return geometry;
+};
+
+const createContinuumPointTexture = () => {
+  const size = 32;
+  const data = new Uint8Array(size * size * 4);
+
+  for (let y = 0; y < size; y += 1) {
+    for (let x = 0; x < size; x += 1) {
+      const nx = ((x + 0.5) / size) * 2 - 1;
+      const ny = ((y + 0.5) / size) * 2 - 1;
+      const radius = Math.hypot(nx, ny);
+      const edge = smoothstep(range(1 - radius, 0, 0.22));
+      const highlight = clamp01(
+        1 - Math.hypot(nx + 0.28, ny - 0.3) / 0.86,
+      );
+      const offset = (y * size + x) * 4;
+      const luminance = Math.round(210 + highlight * 45);
+      data[offset] = luminance;
+      data[offset + 1] = luminance;
+      data[offset + 2] = luminance;
+      data[offset + 3] = Math.round(edge * 255);
+    }
+  }
+
+  const texture = new THREE.DataTexture(
+    data,
+    size,
+    size,
+    THREE.RGBAFormat,
+  );
+  texture.name = 'continuum-particle-lens';
+  texture.magFilter = THREE.LinearFilter;
+  texture.minFilter = THREE.LinearFilter;
+  texture.generateMipmaps = false;
+  texture.needsUpdate = true;
+  return texture;
+};
+
+const createHumanWitnessShape = () => {
+  const shape = new THREE.Shape();
+  shape.moveTo(0, 4.3);
+  shape.bezierCurveTo(0.58, 4.3, 0.94, 3.86, 0.94, 3.27);
+  shape.bezierCurveTo(0.94, 2.76, 0.7, 2.39, 0.43, 2.22);
+  shape.bezierCurveTo(0.78, 2.08, 1.29, 1.9, 1.58, 1.7);
+  shape.bezierCurveTo(1.94, 1.41, 2.17, 0.65, 2.34, -0.02);
+  shape.bezierCurveTo(2.48, -0.56, 2.66, -1.18, 2.55, -1.42);
+  shape.bezierCurveTo(2.47, -1.61, 2.2, -1.61, 2.08, -1.4);
+  shape.bezierCurveTo(1.91, -1.03, 1.73, -0.31, 1.47, 0.37);
+  shape.bezierCurveTo(1.36, 0.14, 1.24, -0.48, 1.08, -1.12);
+  shape.bezierCurveTo(1.28, -1.4, 1.31, -2.43, 1.28, -3.48);
+  shape.bezierCurveTo(1.27, -4.12, 1.35, -4.73, 1.41, -5.03);
+  shape.bezierCurveTo(1.45, -5.26, 0.73, -5.3, 0.66, -5.04);
+  shape.bezierCurveTo(0.53, -4.32, 0.49, -2.82, 0.4, -1.82);
+  shape.bezierCurveTo(0.29, -1.68, 0.15, -1.61, 0, -1.61);
+  shape.bezierCurveTo(-0.16, -1.61, -0.3, -1.69, -0.41, -1.83);
+  shape.bezierCurveTo(-0.5, -2.82, -0.56, -4.3, -0.67, -5.04);
+  shape.bezierCurveTo(-0.72, -5.3, -1.47, -5.28, -1.42, -5.02);
+  shape.bezierCurveTo(-1.35, -4.67, -1.3, -4.08, -1.29, -3.47);
+  shape.bezierCurveTo(-1.27, -2.42, -1.29, -1.4, -1.09, -1.11);
+  shape.bezierCurveTo(-1.25, -0.47, -1.37, 0.13, -1.48, 0.35);
+  shape.bezierCurveTo(-1.77, -0.33, -1.96, -1.05, -2.12, -1.42);
+  shape.bezierCurveTo(-2.24, -1.63, -2.52, -1.62, -2.59, -1.4);
+  shape.bezierCurveTo(-2.69, -1.14, -2.49, -0.54, -2.36, -0.01);
+  shape.bezierCurveTo(-2.18, 0.65, -1.95, 1.35, -1.61, 1.64);
+  shape.bezierCurveTo(-1.3, 1.9, -0.78, 2.08, -0.43, 2.22);
+  shape.bezierCurveTo(-0.71, 2.4, -0.95, 2.77, -0.95, 3.28);
+  shape.bezierCurveTo(-0.95, 3.87, -0.58, 4.3, 0, 4.3);
+  shape.closePath();
+  return shape;
+};
+
+const buildContinuumDensityTargets = (nodeTargets) => {
+  const densityTargets = Array.from(
+    { length: STAGE_NAMES.length },
+    () => new Float32Array(DENSITY_COUNT * 3),
+  );
+  const stageSpread = [0.58, 0.22, 0.13, 0.18, 0.16];
+
+  for (let stage = 0; stage < STAGE_NAMES.length - 1; stage += 1) {
+    const nodeTarget = nodeTargets[stage];
+    const densityTarget = densityTargets[stage];
+    const spread = stageSpread[stage];
+    for (let index = 0; index < DENSITY_COUNT; index += 1) {
+      const anchor = (index * 73 + Math.floor(index / MAX_NODES) * 19) %
+        MAX_NODES;
+      const anchorOffset = anchor * 3;
+      const offset = index * 3;
+      const angle = seeded(index, 84 + stage) * Math.PI * 2;
+      const vertical = seeded(index, 91 + stage) * 2 - 1;
+      const radial = Math.sqrt(Math.max(0, 1 - vertical * vertical));
+      densityTarget[offset] =
+        nodeTarget[anchorOffset] +
+        Math.cos(angle) * radial * spread;
+      densityTarget[offset + 1] =
+        nodeTarget[anchorOffset + 1] +
+        vertical * spread;
+      densityTarget[offset + 2] =
+        nodeTarget[anchorOffset + 2] +
+        Math.sin(angle) * radial * spread;
+    }
+  }
+
+  const contour = createHumanWitnessShape().getSpacedPoints(1024);
+  const humanDensityTarget = densityTargets[5];
+
+  const contains = (x, y) => {
+    let inside = false;
+    for (
+      let index = 0, previous = contour.length - 1;
+      index < contour.length;
+      previous = index, index += 1
+    ) {
+      const currentPoint = contour[index];
+      const previousPoint = contour[previous];
+      const denominator = previousPoint.y - currentPoint.y;
+      const crosses =
+        currentPoint.y > y !== previousPoint.y > y &&
+        x <
+          ((previousPoint.x - currentPoint.x) *
+            (y - currentPoint.y)) /
+            (Math.abs(denominator) < 0.00001 ? 0.00001 : denominator) +
+            currentPoint.x;
+      if (crosses) {
+        inside = !inside;
+      }
+    }
+    return inside;
+  };
+
+  const writeHumanDensityPoint = (index, x, y, unrotatedZ) => {
+    const headTurn = y > 2.12 ? 0.16 : 0;
+    const torsoTilt =
+      y <= 2.12 && y > -1.5 ? x * 0.022 : 0;
+    const relaxedRightLeg =
+      y <= -1.5 && x > 0
+        ? Math.sin(range(-y, 1.5, 5.32) * Math.PI) * 0.12
+        : 0;
+    const posedX =
+      x + headTurn + relaxedRightLeg + (y / 5.4) * 0.055;
+    const posedY = y + torsoTilt;
+    const stance = -0.17;
+    const rotatedX =
+      posedX * Math.cos(stance) +
+      unrotatedZ * Math.sin(stance);
+    const rotatedZ =
+      -posedX * Math.sin(stance) +
+      unrotatedZ * Math.cos(stance);
+    const offset = index * 3;
+    humanDensityTarget[offset] = rotatedX;
+    humanDensityTarget[offset + 1] = posedY;
+    humanDensityTarget[offset + 2] = rotatedZ;
+  };
+
+  const boundaryTotal = Math.ceil(DENSITY_COUNT / 4);
+  let boundaryOrdinal = 0;
+  let candidate = 0;
+
+  for (let index = 0; index < DENSITY_COUNT; index += 1) {
+    if (index % 4 === 0) {
+      const contourProgress =
+        (boundaryOrdinal + seeded(index, 87) * 0.42) /
+        Math.max(1, boundaryTotal);
+      const contourIndex = Math.min(
+        contour.length - 1,
+        Math.floor(contourProgress * contour.length),
+      );
+      const point = contour[contourIndex];
+      const inset = 0.022 + seeded(index, 88) * 0.1;
+      const centerX = point.y > 2.12 ? 0.12 : 0;
+      const centerY = point.y > 2.12 ? 3.22 : point.y;
+      const shellX =
+        point.x + (centerX - point.x) * inset;
+      const shellY =
+        point.y + (centerY - point.y) * inset * 0.72;
+      const shellDepth = (seeded(index, 86) - 0.5) * 0.18;
+      writeHumanDensityPoint(
+        index,
+        shellX,
+        shellY,
+        shellDepth,
+      );
+      boundaryOrdinal += 1;
+      continue;
+    }
+
+    while (candidate < DENSITY_COUNT * 28) {
+      const x = -2.72 + seeded(candidate, 81) * 5.44;
+      const y = -5.32 + seeded(candidate, 82) * 9.72;
+      candidate += 1;
+      if (!contains(x, y)) {
+        continue;
+      }
+
+      let depth = 0.34;
+      if (y > 2.12) {
+        const headX = x / 0.95;
+        const headY = (y - 3.22) / 1.1;
+        depth =
+          0.18 +
+          Math.sqrt(
+            Math.max(0, 1 - headX * headX - headY * headY),
+          ) *
+            0.56;
+      } else if (y > -1.48 && Math.abs(x) < 1.52) {
+        depth = 0.58;
+      } else if (y < -1.48) {
+        depth = 0.4;
+      }
+      writeHumanDensityPoint(
+        index,
+        x,
+        y,
+        (seeded(candidate, 83) - 0.5) * depth * 2,
+      );
+      break;
+    }
+  }
+
+  return densityTargets;
+};
+
 const resolveQuality = (quality) => {
   if (typeof quality === 'string' && QUALITY_LEVELS[quality]) {
     return QUALITY_LEVELS[quality];
@@ -392,6 +827,18 @@ const resolveQuality = (quality) => {
     return {
       nodeCount: Math.min(MAX_NODES, Math.max(24, quality.nodeCount)),
       linkCount: Math.min(MAX_LINKS, Math.max(24, quality.linkCount)),
+      densityCount: Math.min(
+        DENSITY_COUNT,
+        Math.max(
+          1200,
+          quality.densityCount ??
+            (quality.nodeCount <= 72
+              ? 2400
+              : quality.nodeCount >= 192
+                ? 6000
+                : 4200),
+        ),
+      ),
     };
   }
   return QUALITY_LEVELS.balanced;
@@ -428,8 +875,10 @@ export function createEvolutionSystem({
   }
 
   const targets = buildStageTargets();
+  const densityTargets = buildContinuumDensityTargets(targets);
   const pairSets = buildPairSets();
   const currentPositions = new Float32Array(MAX_NODES * 3);
+  const currentDensityPositions = new Float32Array(DENSITY_COUNT * 3);
   const morph = { from: 0, to: 0, mix: 0 };
   const stageWeights = new Float32Array(STAGE_NAMES.length);
   let activeQuality = resolveQuality(qualityConfig ?? quality);
@@ -441,11 +890,12 @@ export function createEvolutionSystem({
     new THREE.Color(0x477f99),
     new THREE.Color(colors.teal),
     new THREE.Color(0x6f756f),
-    new THREE.Color(colors.amber),
+    new THREE.Color(colors.titanium),
   ];
   const mixedColor = new THREE.Color();
   const titaniumColor = new THREE.Color(colors.titanium);
   const amberColor = new THREE.Color(colors.amber);
+  const graphiteColor = new THREE.Color(colors.graphite);
 
   const authoredNodeMaterial =
     materials.nodes ??
@@ -457,6 +907,8 @@ export function createEvolutionSystem({
       clearcoatRoughness: 0.34,
       emissive: colors.violet,
       emissiveIntensity: 0.055,
+      transparent: true,
+      opacity: 1,
     });
   const nodeGeometry = new THREE.IcosahedronGeometry(0.16, 1);
   const nodes = new THREE.InstancedMesh(
@@ -469,6 +921,35 @@ export function createEvolutionSystem({
   nodes.castShadow = true;
   nodes.receiveShadow = true;
   group.add(nodes);
+
+  /*
+   * The fine density is present for the complete journey. It begins inside
+   * entropy, follows every material target, and ultimately supplies the
+   * volumetric continuity of the human witness without a late object reveal.
+   */
+  const continuumPointTexture = createContinuumPointTexture();
+  const continuumDensityMaterial = new THREE.PointsMaterial({
+    color: colors.violet,
+    map: continuumPointTexture,
+    alphaTest: 0.012,
+    size: 0.045,
+    sizeAttenuation: true,
+    transparent: true,
+    opacity: 0.16,
+    depthWrite: false,
+    toneMapped: false,
+  });
+  const continuumDensityGeometry = new THREE.BufferGeometry();
+  continuumDensityGeometry.setAttribute(
+    'position',
+    new THREE.BufferAttribute(currentDensityPositions, 3),
+  );
+  const continuumDensity = new THREE.Points(
+    continuumDensityGeometry,
+    continuumDensityMaterial,
+  );
+  continuumDensity.name = 'persistent-continuum-density';
+  group.add(continuumDensity);
 
   const structuralMaterial =
     materials.structuralLinks ??
@@ -639,24 +1120,23 @@ export function createEvolutionSystem({
   group.add(proofLoops);
 
   const boundaryGroup = new THREE.Group();
-  boundaryGroup.name = 'founder-boundary-membrane';
+  boundaryGroup.name = 'subordinate-cosmos-reference-field';
   const boundaryMaterial =
     materials.boundary ??
-    new THREE.MeshPhysicalMaterial({
-      color: colors.titanium,
-      roughness: 0.72,
-      metalness: 0.03,
+    new THREE.LineBasicMaterial({
+      color: colors.amber,
       transparent: true,
-      opacity: 0.012,
+      opacity: 0.006,
       depthWrite: false,
-      side: THREE.DoubleSide,
     });
-  const boundaryPlaneGeometry = new THREE.PlaneGeometry(14, 11, 18, 14);
-  const boundaryPlane = new THREE.Mesh(
+  const boundaryPlaneGeometry = createEllipseGeometry(6.7, 4.85);
+  const boundaryPlane = new THREE.LineLoop(
     boundaryPlaneGeometry,
     boundaryMaterial,
   );
-  boundaryPlane.position.z = -2.45;
+  boundaryPlane.name = 'human-measure-cosmic-horizon';
+  boundaryPlane.position.z = -2.7;
+  boundaryPlane.rotation.z = -0.08;
   const boundaryEdgeMaterial =
     materials.boundaryEdge ??
     new THREE.LineBasicMaterial({
@@ -665,11 +1145,21 @@ export function createEvolutionSystem({
       opacity: 0,
       depthWrite: false,
     });
-  const boundaryEdges = new THREE.LineSegments(
-    new THREE.EdgesGeometry(boundaryPlaneGeometry, 26),
+  const boundaryEdges = new THREE.Group();
+  boundaryEdges.name = 'receding-cosmic-reference-arcs';
+  const innerCosmicArc = new THREE.LineLoop(
+    createEllipseGeometry(5.15, 3.78),
     boundaryEdgeMaterial,
   );
-  boundaryEdges.position.copy(boundaryPlane.position);
+  innerCosmicArc.position.z = -2.48;
+  innerCosmicArc.rotation.set(0.16, 0.1, 0.12);
+  const outerCosmicArc = new THREE.LineLoop(
+    createEllipseGeometry(7.55, 5.6),
+    boundaryEdgeMaterial,
+  );
+  outerCosmicArc.position.z = -3.08;
+  outerCosmicArc.rotation.set(-0.1, -0.08, -0.18);
+  boundaryEdges.add(innerCosmicArc, outerCosmicArc);
   boundaryGroup.add(boundaryPlane, boundaryEdges);
   group.add(boundaryGroup);
 
@@ -685,9 +1175,9 @@ export function createEvolutionSystem({
       clearcoatRoughness: 0.18,
     });
   const phaseTrace = new THREE.Group();
-  phaseTrace.name = 'persistent-phase-trace';
+  phaseTrace.name = 'persistent-human-chest-anchor';
   const phasePearl = new THREE.Mesh(
-    new THREE.IcosahedronGeometry(0.38, 2),
+    new THREE.IcosahedronGeometry(0.2, 2),
     phaseMaterial,
   );
   const phaseFilament = new THREE.Mesh(
@@ -705,23 +1195,54 @@ export function createEvolutionSystem({
   const linkMid = new THREE.Vector3();
   const linkDirection = new THREE.Vector3();
   const pulsePosition = new THREE.Vector3();
+  let witnessPresence = 0;
+  let humanWitnessOffsetX = 0;
+  let humanWitnessOffsetY = 0;
+  let humanWitnessScale = 1;
 
   const writeCurrentPositions = () => {
     const from = targets[morph.from];
     const to = targets[morph.to];
+    const densityFrom = densityTargets[morph.from];
+    const densityTo = densityTargets[morph.to];
     const mix = morph.mix;
     const inverse = 1 - mix;
     const count = activeQuality.nodeCount;
+    const fromWitnessScale =
+      morph.from === 5 ? humanWitnessScale : 1;
+    const toWitnessScale =
+      morph.to === 5 ? humanWitnessScale : 1;
     const stageScale =
       0.84 +
       (morph.from === 0 ? 0.18 * (1 - mix) : 0) +
-      (morph.to === 5 ? 0.2 * mix : 0);
+      (morph.to === 5 ? 0.2 * mix : 0) -
+      witnessPresence * 0.67;
 
     for (let index = 0; index < count; index += 1) {
       const offset = index * 3;
-      const x = from[offset] * inverse + to[offset] * mix;
-      const y = from[offset + 1] * inverse + to[offset + 1] * mix;
-      const z = from[offset + 2] * inverse + to[offset + 2] * mix;
+      const fromX = from[offset] * fromWitnessScale;
+      const toX = to[offset] * toWitnessScale;
+      const fromY =
+        morph.from === 5
+          ? HUMAN_CHEST_Y +
+            (from[offset + 1] - HUMAN_CHEST_Y) * fromWitnessScale
+          : from[offset + 1];
+      const toY =
+        morph.to === 5
+          ? HUMAN_CHEST_Y +
+            (to[offset + 1] - HUMAN_CHEST_Y) * toWitnessScale
+          : to[offset + 1];
+      const x =
+        fromX * inverse +
+        toX * mix +
+        humanWitnessOffsetX * witnessPresence;
+      const y =
+        fromY * inverse +
+        toY * mix +
+        humanWitnessOffsetY * witnessPresence;
+      const z =
+        from[offset + 2] * fromWitnessScale * inverse +
+        to[offset + 2] * toWitnessScale * mix;
       currentPositions[offset] = x;
       currentPositions[offset + 1] = y;
       currentPositions[offset + 2] = z;
@@ -740,6 +1261,44 @@ export function createEvolutionSystem({
 
     nodes.count = count;
     nodes.instanceMatrix.needsUpdate = true;
+
+    for (
+      let index = 0;
+      index < activeQuality.densityCount;
+      index += 1
+    ) {
+      const offset = index * 3;
+      const fromX = densityFrom[offset] * fromWitnessScale;
+      const toX = densityTo[offset] * toWitnessScale;
+      const fromY =
+        morph.from === 5
+          ? HUMAN_CHEST_Y +
+            (densityFrom[offset + 1] - HUMAN_CHEST_Y) *
+              fromWitnessScale
+          : densityFrom[offset + 1];
+      const toY =
+        morph.to === 5
+          ? HUMAN_CHEST_Y +
+            (densityTo[offset + 1] - HUMAN_CHEST_Y) *
+              toWitnessScale
+          : densityTo[offset + 1];
+      currentDensityPositions[offset] =
+        fromX * inverse +
+        toX * mix +
+        humanWitnessOffsetX * witnessPresence;
+      currentDensityPositions[offset + 1] =
+        fromY * inverse +
+        toY * mix +
+        humanWitnessOffsetY * witnessPresence;
+      currentDensityPositions[offset + 2] =
+        densityFrom[offset + 2] * fromWitnessScale * inverse +
+        densityTo[offset + 2] * toWitnessScale * mix;
+    }
+    continuumDensityGeometry.setDrawRange(
+      0,
+      activeQuality.densityCount,
+    );
+    continuumDensityGeometry.attributes.position.needsUpdate = true;
   };
 
   const updateLinkPool = (mesh, set, opacity, radiusScale = 1) => {
@@ -752,8 +1311,11 @@ export function createEvolutionSystem({
 
     for (let index = 0; index < pairCount; index += 1) {
       const pairOffset = index * 2;
-      const fromIndex = set.pairs[pairOffset] % nodeCount;
-      const toIndex = set.pairs[pairOffset + 1] % nodeCount;
+      const fromIndex = set.pairs[pairOffset];
+      const toIndex = set.pairs[pairOffset + 1];
+      if (fromIndex >= nodeCount || toIndex >= nodeCount) {
+        continue;
+      }
       getTarget(currentPositions, fromIndex, linkStart);
       getTarget(currentPositions, toIndex, linkEnd);
       linkDirection.subVectors(linkEnd, linkStart);
@@ -793,6 +1355,10 @@ export function createEvolutionSystem({
   const setQuality = (nextQuality) => {
     activeQuality = resolveQuality(nextQuality);
     nodes.count = activeQuality.nodeCount;
+    continuumDensityGeometry.setDrawRange(
+      0,
+      activeQuality.densityCount,
+    );
     structuralLinks.count = Math.min(
       activeQuality.linkCount,
       structuralLinks.count,
@@ -807,6 +1373,7 @@ export function createEvolutionSystem({
     progress = 0,
     corePosition,
     reducedMotion = false,
+    viewportAspect = 16 / 9,
   } = {}) => {
     if (disposed) {
       return;
@@ -815,39 +1382,82 @@ export function createEvolutionSystem({
     const normalized = clamp01(progress);
     resolveMorph(normalized, morph);
     updateStageWeights();
+    witnessPresence =
+      morph.from === 5 ? 1 : morph.to === 5 ? morph.mix : 0;
+    const desktopComposition = smoothstep(
+      range(viewportAspect, 0.82, 1.32),
+    );
+    const portraitComposition = 1 - desktopComposition;
+    humanWitnessOffsetX =
+      3.45 + desktopComposition * 2.1;
+    humanWitnessOffsetY =
+      -1.4 + desktopComposition * 1.4;
+    humanWitnessScale =
+      0.92 + portraitComposition * 0.03;
 
     if (corePosition?.isVector3) {
       group.position.copy(corePosition);
     }
 
     writeCurrentPositions();
+    continuumDensityMaterial.opacity =
+      0.16 +
+      witnessPresence * (0.52 + portraitComposition * 0.1);
+    continuumDensityMaterial.size =
+      0.045 +
+      witnessPresence * (0.027 + portraitComposition * 0.004);
 
     mixedColor.lerpColors(
       stageColors[morph.from],
       stageColors[morph.to],
       morph.mix,
     );
-    authoredNodeMaterial.color.copy(mixedColor);
+    authoredNodeMaterial.color
+      .copy(mixedColor)
+      .lerp(graphiteColor, witnessPresence * 0.22);
     authoredNodeMaterial.emissive.copy(mixedColor);
     authoredNodeMaterial.emissiveIntensity =
-      0.035 + stageWeights[3] * 0.05 + stageWeights[4] * 0.07;
+      0.035 +
+      stageWeights[3] * 0.05 +
+      stageWeights[4] * 0.07 +
+      witnessPresence * -0.005;
+    authoredNodeMaterial.opacity =
+      1 - Math.sqrt(witnessPresence) * 0.82;
+    continuumDensityMaterial.color
+      .copy(mixedColor)
+      .lerp(graphiteColor, witnessPresence * 0.72);
 
     structuralMaterial.color
       .copy(titaniumColor)
       .lerp(mixedColor, 0.2 + stageWeights[4] * 0.2);
-    feedbackMaterial.color.copy(mixedColor);
-    feedbackMaterial.emissive.copy(mixedColor);
+    feedbackMaterial.color
+      .copy(mixedColor)
+      .lerp(amberColor, witnessPresence * 0.68);
+    feedbackMaterial.emissive.copy(feedbackMaterial.color);
 
     if (morph.from === morph.to) {
       updateLinkPool(
         structuralLinks,
         pairSets.structural[morph.from],
-        morph.from === 0 ? 0.12 : morph.from === 1 ? 0.22 : 0.44,
+        morph.from === 0
+          ? 0.12
+          : morph.from === 1
+            ? 0.22
+            : morph.from === 5
+              ? 0.065
+              : 0.44,
+        morph.from === 5 ? 0.5 : 1,
       );
       updateLinkPool(
         feedbackLinks,
         pairSets.feedback[morph.from],
-        morph.from === 1 ? 0.08 : morph.from >= 3 ? 0.3 : 0.17,
+        morph.from === 1
+            ? 0.08
+            : morph.from === 5
+              ? 0.008
+            : morph.from >= 3
+              ? 0.3
+              : 0.17,
         0.88,
       );
     } else {
@@ -855,12 +1465,12 @@ export function createEvolutionSystem({
       updateLinkPool(
         structuralLinks,
         pairSets.structural[morph.from],
-        (1 - morph.mix) * 0.42 + bridge * 0.08,
+        (1 - morph.mix) ** 2 * 0.34 + bridge * 0.025,
       );
       updateLinkPool(
         feedbackLinks,
         pairSets.structural[morph.to],
-        morph.mix * 0.42 + bridge * 0.08,
+        morph.mix ** 2 * 0.2 + bridge * 0.025,
         0.88,
       );
     }
@@ -887,7 +1497,10 @@ export function createEvolutionSystem({
       const material = proofLoopMaterials[index];
       setMaterialOpacity(
         material,
-        proofPresence * (0.66 - index * 0.08),
+        proofPresence ** 2 *
+          (1 - witnessPresence) ** 2 *
+          (0.66 - index * 0.08) +
+          witnessPresence * (0.022 - index * 0.004),
       );
       const theta =
         range(normalized, 0.625, 0.81) * Math.PI * 2 * (1.1 - index * 0.16) +
@@ -898,16 +1511,33 @@ export function createEvolutionSystem({
         (index - 1) * 1.4,
       );
       proofPulses[index].position.copy(pulsePosition);
+      proofPulses[index].visible = proofPresence > 0.015;
     }
+    proofLoops.position.set(
+      humanWitnessOffsetX * witnessPresence,
+      (HUMAN_CHEST_Y + humanWitnessOffsetY) * witnessPresence,
+      -1.2 * witnessPresence,
+    );
+    proofLoops.rotation.set(
+      witnessPresence * 0.32,
+      witnessPresence * -0.24,
+      witnessPresence * 0.1,
+    );
+    proofLoops.scale.setScalar(1 - witnessPresence * 0.68);
 
     const accountability = smoothstep(range(normalized, 0.81, 0.91));
     boundaryMaterial.color
       .copy(titaniumColor)
       .lerp(amberColor, accountability);
-    boundaryMaterial.opacity = 0.012 + accountability * 0.25;
-    boundaryEdgeMaterial.opacity = accountability * 0.5;
+    boundaryMaterial.opacity = 0.006 + accountability * 0.094;
+    boundaryEdgeMaterial.opacity = accountability * 0.18;
     boundaryPlane.visible = boundaryMaterial.opacity > 0.003;
     boundaryEdges.visible = boundaryEdgeMaterial.opacity > 0.003;
+    boundaryGroup.position.set(
+      humanWitnessOffsetX * witnessPresence,
+      (HUMAN_CHEST_Y + humanWitnessOffsetY) * witnessPresence,
+      0,
+    );
 
     phaseMaterial.color
       .copy(mixedColor)
@@ -915,17 +1545,36 @@ export function createEvolutionSystem({
     phaseMaterial.emissive.copy(phaseMaterial.color);
     phaseMaterial.emissiveIntensity =
       0.12 + stageWeights[4] * 0.1 + accountability * 0.18;
-    phaseFilament.rotation.z = -0.18 + normalized * Math.PI * 0.72;
-    phaseFilament.rotation.y = normalized * Math.PI * 0.34;
+    const settledSignal = smoothstep(range(normalized, 0.77, 0.82));
+    const travellingFilamentAngle =
+      -0.18 + normalized * Math.PI * 0.72;
+    phaseFilament.rotation.z =
+      travellingFilamentAngle * (1 - settledSignal) +
+      Math.PI * 0.5 * settledSignal;
+    phaseFilament.rotation.y =
+      normalized * Math.PI * 0.34 * (1 - settledSignal);
+    phaseFilament.scale.set(
+      1 - settledSignal * 0.35,
+      1 - settledSignal * 0.65,
+      1 - settledSignal * 0.65,
+    );
     const signalScale =
       0.82 +
       stageWeights[2] * 0.12 +
       stageWeights[3] * 0.18 +
-      accountability * 0.24;
+      settledSignal * -0.22;
     phaseTrace.scale.setScalar(signalScale);
+    phaseTrace.position.set(
+      humanWitnessOffsetX * witnessPresence,
+      (HUMAN_CHEST_Y + humanWitnessOffsetY) * witnessPresence,
+      HUMAN_CHEST_Z * witnessPresence,
+    );
 
     if (reducedMotion) {
-      phaseFilament.rotation.z = -0.18 + normalized * Math.PI * 0.36;
+      phaseFilament.rotation.z =
+        (-0.18 + normalized * Math.PI * 0.36) *
+          (1 - accountability) +
+        Math.PI * 0.5 * accountability;
     }
   };
 
@@ -937,7 +1586,11 @@ export function createEvolutionSystem({
     root: group,
     core: signal,
     persistentCore: signal,
+    finalForm: 'human-witness',
     stageAt: storyStageAt,
+    getCoreWorldPosition(output = new THREE.Vector3()) {
+      return phasePearl.getWorldPosition(output);
+    },
     update,
     setQuality,
     resize() {},
@@ -983,6 +1636,7 @@ export function createEvolutionSystem({
           material.dispose();
         }
       });
+      continuumPointTexture.dispose();
     },
   };
 }

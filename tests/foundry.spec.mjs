@@ -77,6 +77,7 @@ async function readFoundrySnapshot(page) {
         snapshot.stage ??
         snapshot.story?.stage ??
         null,
+      finalForm: snapshot.finalForm ?? null,
       camera,
       core,
       rendererCount: Number(
@@ -92,6 +93,7 @@ async function readFoundrySnapshot(page) {
         snapshot.renderer?.state ??
         document.documentElement.dataset.renderState ??
         null,
+      frames: Number(snapshot.frames ?? Number.NaN),
     };
   });
 }
@@ -133,15 +135,12 @@ async function scrollToDocumentProgress(
     await page.evaluate(() => window.__TAIC_FOUNDRY__?.pause?.());
   } else {
     await page.waitForTimeout(Math.min(settleMilliseconds, 80));
-    await expect
-      .poll(
-        async () => (await readFoundrySnapshot(page))?.progress,
-        {
-          message: `foundry progress should settle at ${progress}`,
-          timeout: Math.max(2_000, settleMilliseconds),
-        },
-      )
-      .toBeCloseTo(progress, 1);
+    const settled = await readFoundrySnapshot(page);
+    expect(
+      settled?.progress,
+      `foundry progress should settle at ${progress}`,
+    ).toBeCloseTo(progress, 2);
+    return settled;
   }
   return readFoundrySnapshot(page);
 }
@@ -234,9 +233,25 @@ test.describe('Autonomous Foundry production contract', () => {
       await expect(beat.locator('h1, h2, h3').first()).toBeAttached();
     }
 
+    const canvasResolution = await page
+      .locator('#foundry-canvas')
+      .evaluate((canvas) => ({
+        width: canvas.width,
+        height: canvas.height,
+        clientWidth: canvas.clientWidth,
+        clientHeight: canvas.clientHeight,
+      }));
+    expect(canvasResolution.width).toBeGreaterThanOrEqual(
+      Math.floor(canvasResolution.clientWidth * 0.75),
+    );
+    expect(canvasResolution.height).toBeGreaterThanOrEqual(
+      Math.floor(canvasResolution.clientHeight * 0.75),
+    );
+
     const snapshot = await readFoundrySnapshot(page);
     expect(snapshot).not.toBeNull();
     expect(snapshot.rendererCount).toBe(1);
+    expect(snapshot.finalForm).toBe('human-witness');
     expect(snapshot.coreUuid).toMatch(
       /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
     );
@@ -318,6 +333,18 @@ test.describe('Autonomous Foundry production contract', () => {
     expect(forward.at(-1).progress - forward[0].progress).toBeGreaterThan(0.9);
     expect(reverse.at(-1).progress).toBeLessThan(0.08);
     expect(new Set(snapshots.map((snapshot) => snapshot.coreUuid)).size).toBe(1);
+  });
+
+  test('renders the requested frame while manually paused', async ({ page }) => {
+    await page.goto('/');
+    await waitForFoundry(page);
+
+    await page.evaluate(() => window.__TAIC_FOUNDRY__.pause());
+    const before = await readFoundrySnapshot(page);
+    const after = await scrollToDocumentProgress(page, 0.98);
+
+    expect(after.progress).toBeGreaterThan(0.95);
+    expect(after.frames).toBeGreaterThan(before.frames);
   });
 
   test('moves the camera through the journey and parks it for judgement', async ({

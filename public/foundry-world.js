@@ -34,6 +34,7 @@ const QUALITY = Object.freeze({
     entropyCount: 420,
     nodeCount: 72,
     linkCount: 84,
+    densityCount: 2400,
     atomCount: 18,
     bondCount: 32,
     dnaSegments: 44,
@@ -50,6 +51,7 @@ const QUALITY = Object.freeze({
     entropyCount: 720,
     nodeCount: 128,
     linkCount: 160,
+    densityCount: 4200,
     atomCount: 28,
     bondCount: 52,
     dnaSegments: 68,
@@ -66,6 +68,7 @@ const QUALITY = Object.freeze({
     entropyCount: 1080,
     nodeCount: 192,
     linkCount: 240,
+    densityCount: 6000,
     atomCount: 40,
     bondCount: 72,
     dnaSegments: 92,
@@ -177,8 +180,8 @@ const CORE_POINTS = Object.freeze([
   [-0.8, 1.2, -51],
   [0.5, 1.8, -83],
   [-0.4, 2.2, -116],
-  [0.2, 2.5, -151],
-  [0.1, 2.55, -160],
+  [0.2, 2.5, -161.8],
+  [0.1, 2.55, -163],
   [0, 2.6, -163.2],
   [0, 2.6, -163.2],
 ]);
@@ -664,11 +667,11 @@ export function createFoundryWorld({
 
   const boundaryLight = new THREE.PointLight(
     PALETTE.amber,
-    quality === 'low' ? 6 : 10,
+    quality === 'low' ? 4 : 7,
     34,
     1.7,
   );
-  boundaryLight.position.set(0, 3, -166);
+  boundaryLight.position.set(4.8, 3.2, -162);
 
   scene.add(
     hemisphere,
@@ -819,12 +822,22 @@ export function createFoundryWorld({
     const accountability = smootherStep(
       rangeProgress(currentProgress, 0.79, 0.9),
     );
+    const desktopComposition = smootherStep(
+      rangeProgress(viewportAspect, 0.82, 1.32),
+    );
+    const witnessOffsetX = 3.45 + desktopComposition * 2.1;
+    const witnessOffsetY = -1.4 + desktopComposition * 1.4;
 
     intelligenceRim.intensity =
       1.1 + intelligence * 1.25 - accountability * 0.42;
     verifiedFill.intensity = verification * 1.3;
     boundaryLight.intensity =
-      accountability * (quality === 'low' ? 12 : 21);
+      accountability * (quality === 'low' ? 5 : 8);
+    boundaryLight.position.set(
+      corePosition.x + witnessOffsetX,
+      corePosition.y + 0.62 + witnessOffsetY,
+      corePosition.z + 1.2,
+    );
     renderer.toneMappingExposure =
       1.02 + intelligence * 0.035 + accountability * 0.025;
   };
@@ -858,7 +871,7 @@ export function createFoundryWorld({
   /**
    * The evolution module receives the authored camera and signal positions so
    * its probability cloud, molecular lineage, DNA, neural/calibration hinge,
-   * proof loops, and founder boundary share the same spatial grammar. Narrative
+   * proof loops, and human witness share the same spatial grammar. Narrative
    * time is progress; wall-clock time is only an optional restrained idle phase.
    */
   const updateScene = (timeSeconds) => {
@@ -1009,17 +1022,21 @@ export function createFoundryWorld({
       return;
     }
 
+    const canvasBounds = canvas.getBoundingClientRect();
+    const canvasIsStaged =
+      typeof document !== 'undefined' &&
+      document.documentElement.dataset.foundryReady === 'true';
     const width = Math.max(
       1,
       Math.round(
-        canvas.clientWidth ||
+        (canvasIsStaged ? canvasBounds.width : 0) ||
           (typeof window === 'undefined' ? 1 : window.innerWidth),
       ),
     );
     const height = Math.max(
       1,
       Math.round(
-        canvas.clientHeight ||
+        (canvasIsStaged ? canvasBounds.height : 0) ||
           (typeof window === 'undefined' ? 1 : window.innerHeight),
       ),
     );
@@ -1138,7 +1155,20 @@ export function createFoundryWorld({
       );
       const now = performance.now();
 
-      if (pauseReasons.size > 0 || contextLost) {
+      if (contextLost) {
+        updateScene(now * 0.001);
+        return;
+      }
+
+      if (
+        pauseReasons.size === 1 &&
+        pauseReasons.has('manual')
+      ) {
+        renderFrame(now);
+        return;
+      }
+
+      if (pauseReasons.size > 0) {
         updateScene(now * 0.001);
         return;
       }
@@ -1238,6 +1268,7 @@ export function createFoundryWorld({
         beatId,
         beatIndex: storyBeatIndexAt(progress),
         storyStage: storyStageAt(progress),
+        finalForm: evolution?.finalForm ?? null,
         cameraPosition: [
           Number(camera.position.x.toFixed(4)),
           Number(camera.position.y.toFixed(4)),

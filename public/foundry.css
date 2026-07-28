@@ -941,16 +941,7 @@ html[data-foundry-ready="true"][data-active-beat="intention"]:not([data-motion="
 }
 
 html[data-foundry-ready="true"][data-active-beat="judgement"]:not([data-motion="reduced"]) {
-  --proof-opacity: 1;
-}
-
-html[data-foundry-ready="true"][data-active-beat="judgement"]:not([data-motion="reduced"]) .foundry-proof-line__edge {
-  background: linear-gradient(
-    to bottom,
-    transparent,
-    var(--foundry-amber) 8% 90%,
-    transparent
-  );
+  --proof-opacity: 0;
 }
 
 html[data-foundry-ready="true"][data-active-beat="judgement"]:not([data-motion="reduced"]) .foundry-core-label {

@@ -2,7 +2,7 @@
 
 ## Direction
 
-The landing page is a continuous high-key material film about the accumulation of organized agency. One persistent signal moves from entropy to atomic structure, inherited information, engineered intelligence, autonomous verification loops, and finally human judgement. It should feel authored, tactile, quiet, and expensive. It must never resemble a neon AI dashboard, a science-documentary montage, or a gallery of disconnected WebGL tricks.
+The landing page is a continuous high-key material film about the accumulation of organized agency. One persistent signal moves from entropy to atomic structure, inherited information, engineered intelligence, autonomous verification loops, and finally an embodied human witness. It should feel authored, tactile, quiet, and expensive. It must never resemble a neon AI dashboard, a science-documentary montage, or a gallery of disconnected WebGL tricks.
 
 ## Governing Rules
 
@@ -10,7 +10,7 @@ The landing page is a continuous high-key material film about the accumulation o
 2. At every scroll position there is one dominant phrase and one legible material event.
 3. The renderer occupies the right visual field; semantic copy owns a protected left field.
 4. Every new form must grow from material already present in the previous form. Full-frame fades and object swaps are prohibited.
-5. Geometry must belong to one material family. Avoid Bohr-model atoms, stock rotating DNA, glowing brains, chips, portals, code rain, and decorative particle explosions.
+5. Geometry must belong to one material family. Avoid Bohr-model atoms, stock rotating DNA, glowing brains, chips, portals, code rain, and decorative particle explosions. The final human must emerge from the same particle population and must not arrive as a character asset.
 
 ## Palette
 
@@ -45,12 +45,12 @@ GSAP ScrollTrigger owns normalized progress. Lenis may smooth eligible wheel inp
 
 ## Rendering
 
-One Three.js renderer, one scene, one camera, and one persistent phase trace survive the entire journey. The same seeded material population morphs from particulate noise into probability volumes, bonds, DNA, a computational field, and recursive proof loops. AI is represented as prediction corrected by measured reality, not as a brain or humanoid. Materials favor ceramic, brushed titanium, milky translucent volumes, and controlled emission. Studio lighting, restrained atmosphere, and selective high-tier effects may create depth; postprocessing cannot disguise weak geometry. Adaptive quality removes secondary instances before sacrificing the persistent signal or stage silhouette. Rendering pauses when hidden, recovers after context restoration, and fails open to readable semantic content.
+One Three.js renderer, one scene, one camera, and one persistent phase trace survive the entire journey. The same seeded material population morphs from particulate noise into probability volumes, bonds, DNA, a computational field, recursive proof loops, and the final human witness. Engineered intelligence is represented as prediction corrected by measured reality, never as a person. The human form appears only when the story reaches purpose, judgement, and accountability. Materials favor ceramic, brushed titanium, milky translucent volumes, and controlled emission. Studio lighting, restrained atmosphere, and selective high-tier effects may create depth; postprocessing cannot disguise weak geometry. Adaptive quality removes secondary instances before sacrificing the persistent signal or stage silhouette. Rendering pauses when hidden, recovers after context restoration, and fails open to readable semantic content.
 
 ## Accountability
 
-Autonomous loops may assemble and continue operating. The founder plane does not move. The final verified signal reaches that fixed human boundary and stops before crossing, making judgement and accountability visible while amber receives its only full payoff.
+Autonomous loops may assemble and continue operating. As the story resolves, their material becomes an upright human witness and the persistent signal settles at the sternum. The surrounding loops recede into a subordinate cosmic reference field centered on that chest. The person is the final measure: judgement and accountability remain human while amber receives its only full payoff.
 
 ## Scientific Framing
 
-The sequence is a visual metaphor for increasing organized agency, not a claim that entropy inevitably becomes AI. Atoms are shown as probability volumes rather than planetary orbits. DNA is presented as one durable information store rather than the origin of life. The biological-to-computational transition includes a visibly engineered calibration plane so AI reads as human-built technology, not the next rung of biological evolution.
+The sequence is a visual metaphor for increasing organized agency, not a claim that entropy inevitably becomes AI or that evolution culminates in humanity. Atoms are shown as probability volumes rather than planetary orbits. DNA is presented as one durable information store rather than the origin of life. The biological-to-computational transition includes a visibly engineered calibration plane so AI reads as human-built technology, not the next rung of biological evolution. The final composition is deliberately anthropocentric: it states the company's human point of view by placing purpose, judgement, and accountability at the center of the rendered cosmos.
