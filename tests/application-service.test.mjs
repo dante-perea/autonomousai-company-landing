@@ -294,7 +294,7 @@ test('records only allowlisted first-party funnel events with provider acknowled
     {
       fetchImpl: async (url, options) => {
         captured = { url, body: JSON.parse(options.body) };
-        return Response.json({ status: 1 });
+        return Response.json({ status: 'Ok' });
       },
       now: () => new Date('2026-07-28T09:00:00.000Z'),
     },

@@ -85,7 +85,7 @@ test('defines the three requested funnel events and a server-confirmed conversio
   assert.match(server, /notificationReceipt/);
   assert.match(eventServer, /operator_page_view/);
   assert.match(eventServer, /operator_cta_click/);
-  assert.match(eventServer, /Number\(body\?\.status\) !== 1/);
+  assert.match(eventServer, /body\?\.status === 'Ok'/);
 });
 
 test('uses the operator subdomain as canonical and redirects both entry paths', async () => {

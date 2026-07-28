@@ -198,7 +198,10 @@ async function captureSubmission(application, applicationId, fit, metadata, envi
   });
 
   const body = await response.json().catch(() => ({}));
-  return response.ok && Number(body?.status) === 1;
+  return (
+    response.ok &&
+    (Number(body?.status) === 1 || body?.status === 'Ok')
+  );
 }
 
 export async function processApplication(input, context = {}, dependencies = {}) {

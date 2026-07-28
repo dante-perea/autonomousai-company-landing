@@ -78,7 +78,10 @@ export async function recordOperatorEvent(input, context = {}, dependencies = {}
     },
   );
   const body = await response.json().catch(() => ({}));
-  if (!response.ok || Number(body?.status) !== 1) {
+  const providerAccepted =
+    response.ok &&
+    (Number(body?.status) === 1 || body?.status === 'Ok');
+  if (!providerAccepted) {
     throw new Error('Analytics provider rejected the event.');
   }
 
