@@ -1,0 +1,1296 @@
+:root {
+  --foundry-ivory: #ebe8e0;
+  --foundry-ivory-bright: #f7f4ed;
+  --foundry-paper: #dedbd3;
+  --foundry-graphite: #161817;
+  --foundry-graphite-soft: #393b38;
+  --foundry-titanium: #a9aaa5;
+  --foundry-titanium-dark: #737570;
+  --foundry-amber: #d66f16;
+  --foundry-amber-hot: #ffad38;
+  --foundry-line: rgb(22 24 23 / 18%);
+  --foundry-line-strong: rgb(22 24 23 / 38%);
+  --foundry-gutter: clamp(1rem, 4vw, 5rem);
+  --foundry-header-height: 5.35rem;
+  --foundry-progress: 0;
+  --beat-progress: 0;
+  --proof-x: 72%;
+  --proof-opacity: 0.78;
+}
+
+html {
+  background: var(--foundry-ivory);
+  color: var(--foundry-graphite);
+  scroll-behavior: smooth;
+}
+
+body.foundry-page {
+  width: 100%;
+  min-width: 0;
+  min-height: 100%;
+  margin: 0;
+  overflow-x: clip;
+  color: var(--foundry-graphite);
+  background:
+    linear-gradient(90deg, rgb(255 255 255 / 16%), transparent 28% 72%, rgb(0 0 0 / 3%)),
+    var(--foundry-ivory);
+  font-family: "Mona Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+.foundry-page *,
+.foundry-page *::before,
+.foundry-page *::after {
+  box-sizing: border-box;
+}
+
+.foundry-page a {
+  color: inherit;
+}
+
+.foundry-page a:focus-visible {
+  outline: 2px solid var(--foundry-amber);
+  outline-offset: 5px;
+}
+
+.foundry-skip-link {
+  position: fixed;
+  z-index: 1000;
+  top: 0.75rem;
+  left: 0.75rem;
+  padding: 0.75rem 1rem;
+  color: var(--foundry-ivory-bright);
+  background: var(--foundry-graphite);
+  font: 500 0.75rem/1 "Martian Mono", monospace;
+  letter-spacing: 0.02em;
+  transform: translateY(-180%);
+  transition: transform 160ms ease;
+}
+
+.foundry-skip-link:focus {
+  transform: translateY(0);
+}
+
+.foundry-header {
+  position: fixed;
+  z-index: 100;
+  inset: 0 0 auto;
+  display: grid;
+  grid-template-columns: minmax(13.5rem, 1fr) minmax(25rem, 1.25fr) minmax(8.25rem, 1fr);
+  align-items: center;
+  min-width: 0;
+  min-height: var(--foundry-header-height);
+  padding: 0 var(--foundry-gutter);
+  border-bottom: 1px solid var(--foundry-line);
+  background: rgb(235 232 224 / 88%);
+  box-shadow: 0 1rem 3rem rgb(22 24 23 / 3%);
+  backdrop-filter: blur(18px) saturate(80%);
+  -webkit-backdrop-filter: blur(18px) saturate(80%);
+}
+
+.foundry-lockup {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  min-width: 0;
+  color: var(--foundry-graphite);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.foundry-lockup img {
+  flex: 0 0 auto;
+  width: clamp(2rem, 3.2vw, 3rem);
+  height: auto;
+  margin-right: clamp(0.55rem, 1vw, 0.9rem);
+}
+
+.foundry-lockup span {
+  overflow: hidden;
+  font-size: clamp(0.7rem, 1.02vw, 0.96rem);
+  font-weight: 720;
+  font-stretch: 112%;
+  letter-spacing: 0.105em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+}
+
+.foundry-navigation {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  align-self: stretch;
+  min-width: 0;
+}
+
+.foundry-navigation a {
+  position: relative;
+  display: flex;
+  gap: 0.35rem;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  padding: 0.35rem 0.25rem 0;
+  color: rgb(22 24 23 / 55%);
+  text-decoration: none;
+  transition:
+    color 180ms ease,
+    background-color 180ms ease;
+}
+
+.foundry-navigation a::after {
+  position: absolute;
+  right: 28%;
+  bottom: -1px;
+  left: 28%;
+  height: 2px;
+  background: var(--foundry-amber);
+  content: "";
+  opacity: 0;
+  transform: scaleX(0);
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease;
+  transform-origin: center;
+}
+
+.foundry-navigation a:hover,
+.foundry-navigation a[aria-current="true"] {
+  color: var(--foundry-graphite);
+  background: rgb(255 255 255 / 22%);
+}
+
+.foundry-navigation a:hover::after,
+.foundry-navigation a[aria-current="true"]::after {
+  opacity: 1;
+  transform: scaleX(1);
+}
+
+.foundry-navigation span,
+.foundry-navigation b {
+  overflow: hidden;
+  font: 500 clamp(0.48rem, 0.54vw, 0.61rem)/1 "Martian Mono", monospace;
+  letter-spacing: 0.025em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.foundry-navigation b {
+  font-weight: 500;
+}
+
+.foundry-thesis-link {
+  display: inline-flex;
+  gap: 0.75rem;
+  align-items: center;
+  width: fit-content;
+  color: var(--foundry-graphite);
+  font: 500 0.7rem/1 "Martian Mono", monospace;
+  letter-spacing: 0.015em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.foundry-thesis-link::after {
+  position: absolute;
+  right: 0;
+  bottom: -0.65rem;
+  left: 0;
+  height: 1px;
+  background: currentColor;
+  content: "";
+  transform: scaleX(0);
+  transition: transform 220ms ease;
+  transform-origin: right;
+}
+
+.foundry-thesis-link:hover::after,
+.foundry-thesis-link:focus-visible::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+.foundry-thesis-link--header {
+  position: relative;
+  justify-self: end;
+}
+
+.foundry-thesis-link__short {
+  display: none;
+}
+
+.foundry-track {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+
+.foundry-stage {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  background: var(--foundry-ivory);
+  isolation: isolate;
+}
+
+#foundry-canvas,
+.foundry-atmosphere,
+.foundry-proof-line,
+.foundry-core-label,
+.foundry-progress-readout,
+.foundry-scroll-cue {
+  display: none;
+}
+
+.foundry-beats {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  min-width: 0;
+}
+
+.foundry-beat {
+  position: relative;
+  display: grid;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  min-height: 100svh;
+  padding:
+    calc(var(--foundry-header-height) + clamp(3rem, 8vh, 7rem))
+    var(--foundry-gutter)
+    clamp(4rem, 9vh, 8rem);
+  border-bottom: 1px solid var(--foundry-line);
+  background:
+    linear-gradient(135deg, rgb(255 255 255 / 20%), transparent 42%),
+    var(--foundry-ivory);
+}
+
+.foundry-beat:nth-child(even) {
+  background:
+    linear-gradient(315deg, rgb(255 255 255 / 24%), transparent 44%),
+    var(--foundry-paper);
+}
+
+.foundry-beat__copy {
+  position: relative;
+  z-index: 2;
+  width: min(100%, 92rem);
+  min-width: 0;
+  margin: 0 auto;
+}
+
+.foundry-beat__index {
+  display: flex;
+  gap: clamp(1rem, 2.4vw, 2.8rem);
+  align-items: center;
+  margin: 0 0 clamp(1.6rem, 3.5vh, 3.6rem);
+  color: rgb(22 24 23 / 62%);
+  font: 500 clamp(0.58rem, 0.68vw, 0.74rem)/1 "Martian Mono", monospace;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.foundry-beat__index span:first-child {
+  display: inline-grid;
+  width: 2.6rem;
+  height: 2.6rem;
+  border: 1px solid var(--foundry-line-strong);
+  place-items: center;
+}
+
+.foundry-progression {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.85rem;
+  align-items: baseline;
+  margin: 0 0 clamp(1rem, 2.5vh, 2rem);
+  color: rgb(22 24 23 / 58%);
+  font-size: clamp(0.86rem, 1.55vw, 1.5rem);
+  font-weight: 620;
+  letter-spacing: -0.02em;
+}
+
+.foundry-progression > span[aria-hidden="true"] {
+  color: var(--foundry-amber);
+  font-family: "Martian Mono", monospace;
+  font-size: 0.7em;
+}
+
+.foundry-beat h1,
+.foundry-beat h2 {
+  max-width: 12.8ch;
+  margin: 0;
+  color: var(--foundry-graphite);
+  font-size: clamp(3.35rem, 8.7vw, 10rem);
+  font-weight: 560;
+  font-stretch: 88%;
+  letter-spacing: -0.067em;
+  line-height: 0.82;
+  text-wrap: balance;
+}
+
+.foundry-beat h1 {
+  max-width: 10.8ch;
+  font-size: clamp(3.7rem, 10.5vw, 12.2rem);
+}
+
+.foundry-mask {
+  display: block;
+  overflow: clip;
+  min-width: 0;
+  padding: 0.04em 0 0.105em;
+}
+
+.foundry-mask > span {
+  display: block;
+  transform-origin: left center;
+}
+
+.foundry-mask--amber {
+  color: var(--foundry-amber);
+}
+
+.foundry-beat__lede,
+.foundry-beat__note {
+  max-width: 43rem;
+  margin: clamp(1.75rem, 4.8vh, 4.25rem) 0 0;
+  color: var(--foundry-graphite-soft);
+  font-size: clamp(1rem, 1.36vw, 1.38rem);
+  font-weight: 430;
+  letter-spacing: -0.022em;
+  line-height: 1.45;
+}
+
+.foundry-beat__note {
+  max-width: 36rem;
+  margin-top: clamp(1.15rem, 2.3vh, 2rem);
+  color: rgb(22 24 23 / 62%);
+  font: 400 clamp(0.68rem, 0.78vw, 0.84rem)/1.65 "Martian Mono", monospace;
+  letter-spacing: -0.015em;
+}
+
+.foundry-loop {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  width: min(100%, 68rem);
+  margin: clamp(2rem, 5vh, 4.5rem) 0 0;
+  padding: 0;
+  border-top: 1px solid var(--foundry-line-strong);
+  border-bottom: 1px solid var(--foundry-line-strong);
+  list-style: none;
+}
+
+.foundry-loop li {
+  display: grid;
+  gap: clamp(1rem, 2.6vh, 2rem);
+  min-width: 0;
+  padding: clamp(1rem, 2vw, 1.8rem);
+  border-right: 1px solid var(--foundry-line);
+}
+
+.foundry-loop li:last-child {
+  border-right: 0;
+}
+
+.foundry-loop span {
+  color: rgb(22 24 23 / 52%);
+  font: 500 0.58rem/1 "Martian Mono", monospace;
+}
+
+.foundry-loop strong {
+  overflow: hidden;
+  font-size: clamp(0.9rem, 1.38vw, 1.35rem);
+  font-weight: 610;
+  letter-spacing: -0.035em;
+  text-overflow: ellipsis;
+}
+
+.foundry-frontiers {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  width: min(100%, 72rem);
+  margin-top: clamp(2rem, 5vh, 4.5rem);
+  border-top: 1px solid var(--foundry-line-strong);
+  border-bottom: 1px solid var(--foundry-line-strong);
+}
+
+.foundry-frontiers article {
+  min-width: 0;
+  padding: clamp(1.2rem, 2.8vw, 2.75rem) clamp(1rem, 3vw, 3rem) clamp(1.35rem, 3vw, 3rem) 0;
+}
+
+.foundry-frontiers article + article {
+  padding-right: 0;
+  padding-left: clamp(1rem, 3vw, 3rem);
+  border-left: 1px solid var(--foundry-line);
+}
+
+.foundry-frontiers article > p:first-child {
+  margin: 0 0 clamp(0.8rem, 1.6vh, 1.3rem);
+  color: var(--foundry-amber);
+  font: 500 0.62rem/1 "Martian Mono", monospace;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.foundry-frontiers h3 {
+  max-width: 19ch;
+  margin: 0;
+  font-size: clamp(1.4rem, 2.2vw, 2.3rem);
+  font-weight: 590;
+  letter-spacing: -0.045em;
+  line-height: 1;
+}
+
+.foundry-frontiers article > p:last-child {
+  max-width: 39ch;
+  margin: clamp(0.85rem, 1.8vh, 1.4rem) 0 0;
+  color: rgb(22 24 23 / 67%);
+  font-size: clamp(0.78rem, 0.92vw, 0.96rem);
+  line-height: 1.5;
+}
+
+.foundry-scale {
+  display: grid;
+  width: min(100%, 66rem);
+  margin: clamp(2rem, 5vh, 4rem) 0 0;
+  padding: 0;
+  border-top: 1px solid var(--foundry-line-strong);
+  list-style: none;
+}
+
+.foundry-scale li {
+  display: grid;
+  grid-template-columns: minmax(4.5rem, 0.16fr) minmax(0, 1fr);
+  gap: clamp(1rem, 3vw, 3rem);
+  align-items: baseline;
+  min-width: 0;
+  padding: clamp(0.8rem, 1.8vh, 1.35rem) 0;
+  border-bottom: 1px solid var(--foundry-line);
+}
+
+.foundry-scale span {
+  color: rgb(22 24 23 / 50%);
+  font: 500 0.58rem/1 "Martian Mono", monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.foundry-scale strong {
+  min-width: 0;
+  font-size: clamp(1rem, 1.55vw, 1.5rem);
+  font-weight: 570;
+  letter-spacing: -0.035em;
+}
+
+.foundry-thesis-link--final {
+  position: relative;
+  margin-top: clamp(2rem, 5vh, 4.5rem);
+  padding: 0 0 0.8rem;
+  color: var(--foundry-amber);
+  font-size: clamp(0.7rem, 0.82vw, 0.88rem);
+}
+
+.foundry-footer {
+  position: relative;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: clamp(1rem, 4vw, 5rem);
+  align-items: center;
+  min-height: 9rem;
+  padding: 2rem var(--foundry-gutter);
+  color: var(--foundry-ivory);
+  background: var(--foundry-graphite);
+}
+
+.foundry-lockup--footer {
+  color: var(--foundry-ivory);
+}
+
+.foundry-lockup--footer img {
+  filter: brightness(1.45) saturate(0.85);
+}
+
+.foundry-footer p {
+  margin: 0;
+  color: rgb(235 232 224 / 62%);
+  font: 400 clamp(0.55rem, 0.68vw, 0.7rem)/1.4 "Martian Mono", monospace;
+  letter-spacing: 0.02em;
+}
+
+html[data-foundry-ready="true"]:not([data-motion="reduced"]) .foundry-track {
+  height: 800vh;
+  min-height: 800vh;
+}
+
+html[data-foundry-ready="true"]:not([data-motion="reduced"]) .foundry-stage {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  min-height: 34rem;
+  overflow: hidden;
+}
+
+html[data-foundry-ready="true"]:not([data-motion="reduced"]) #foundry-canvas {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  pointer-events: none;
+}
+
+html[data-foundry-ready="true"]:not([data-motion="reduced"]) .foundry-atmosphere {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  display: block;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.foundry-atmosphere > div {
+  position: absolute;
+  inset: 0;
+}
+
+.foundry-atmosphere__titanium {
+  background:
+    linear-gradient(104deg, transparent 0 56%, rgb(255 255 255 / 22%) 58%, transparent 61%),
+    repeating-linear-gradient(
+      0deg,
+      rgb(22 24 23 / 0%) 0,
+      rgb(22 24 23 / 0%) 2px,
+      rgb(22 24 23 / 2.8%) 3px,
+      rgb(255 255 255 / 2.6%) 4px
+    );
+  mix-blend-mode: multiply;
+  opacity: 0.62;
+}
+
+.foundry-atmosphere__heat {
+  inset: -15%;
+  background:
+    radial-gradient(circle at 78% 56%, rgb(255 173 56 / 22%), transparent 8%),
+    radial-gradient(circle at 78% 56%, rgb(214 111 22 / 11%), transparent 26%),
+    radial-gradient(circle at 73% 47%, rgb(255 255 255 / 28%), transparent 37%);
+  opacity: calc(0.46 + (var(--foundry-progress) * 0.32));
+  transform: translate3d(
+    calc((var(--foundry-progress) - 0.5) * -3%),
+    calc((var(--foundry-progress) - 0.5) * 2%),
+    0
+  );
+}
+
+.foundry-atmosphere__grain {
+  inset: -20%;
+  background-image:
+    radial-gradient(circle at 13% 22%, rgb(22 24 23 / 30%) 0 0.6px, transparent 0.8px),
+    radial-gradient(circle at 71% 63%, rgb(255 255 255 / 55%) 0 0.7px, transparent 0.9px),
+    radial-gradient(circle at 39% 81%, rgb(22 24 23 / 22%) 0 0.55px, transparent 0.8px);
+  background-position:
+    0 0,
+    3px 7px,
+    11px 2px;
+  background-size:
+    17px 19px,
+    23px 29px,
+    31px 37px;
+  mix-blend-mode: multiply;
+  opacity: 0.1;
+  animation: foundry-grain 360ms steps(2, jump-none) infinite;
+}
+
+.foundry-atmosphere__vignette {
+  background:
+    linear-gradient(90deg, rgb(22 24 23 / 5%), transparent 18% 78%, rgb(22 24 23 / 8%)),
+    linear-gradient(0deg, rgb(22 24 23 / 8%), transparent 20% 82%, rgb(255 255 255 / 9%));
+  box-shadow: inset 0 0 12rem rgb(22 24 23 / 5%);
+}
+
+@keyframes foundry-grain {
+  0% {
+    transform: translate3d(-2.5%, 1.5%, 0);
+  }
+
+  25% {
+    transform: translate3d(1.5%, -2%, 0);
+  }
+
+  50% {
+    transform: translate3d(3%, 2.5%, 0);
+  }
+
+  75% {
+    transform: translate3d(-1%, -3%, 0);
+  }
+
+  100% {
+    transform: translate3d(-3%, 1%, 0);
+  }
+}
+
+html[data-foundry-ready="true"]:not([data-motion="reduced"]) .foundry-proof-line {
+  position: absolute;
+  z-index: 5;
+  top: calc(var(--foundry-header-height) + 2.4rem);
+  bottom: 3.7rem;
+  left: var(--proof-x);
+  display: block;
+  width: 1px;
+  opacity: var(--proof-opacity);
+  pointer-events: none;
+  transform: translate3d(-50%, 0, 0);
+}
+
+.foundry-proof-line__edge {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    var(--foundry-titanium-dark) 9% 88%,
+    transparent
+  );
+}
+
+.foundry-proof-line__flare {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0.38rem;
+  height: clamp(4rem, 16vh, 10rem);
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgb(255 173 56 / 16%),
+    rgb(214 111 22 / 72%),
+    rgb(255 173 56 / 16%),
+    transparent
+  );
+  filter: blur(4px);
+  opacity: calc(0.18 + var(--beat-progress) * 0.44);
+  transform: translate(-50%, -50%);
+}
+
+html[data-foundry-ready="true"]:not([data-motion="reduced"]) .foundry-core-label,
+html[data-foundry-ready="true"]:not([data-motion="reduced"]) .foundry-progress-readout {
+  position: absolute;
+  z-index: 8;
+  bottom: 1.65rem;
+  display: flex;
+  align-items: center;
+  margin: 0;
+  color: rgb(22 24 23 / 56%);
+  font: 500 clamp(0.47rem, 0.58vw, 0.62rem)/1 "Martian Mono", monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+html[data-foundry-ready="true"]:not([data-motion="reduced"]) .foundry-core-label {
+  left: var(--foundry-gutter);
+  gap: clamp(0.45rem, 1vw, 1rem);
+}
+
+.foundry-core-label span {
+  color: var(--foundry-amber);
+}
+
+html[data-foundry-ready="true"]:not([data-motion="reduced"]) .foundry-progress-readout {
+  right: var(--foundry-gutter);
+  gap: 0.7rem;
+}
+
+.foundry-progress-readout__rule {
+  display: block;
+  width: clamp(2rem, 5vw, 5rem);
+  height: 1px;
+  overflow: hidden;
+  background:
+    linear-gradient(var(--foundry-amber), var(--foundry-amber)) 0 0 /
+      calc(var(--foundry-progress) * 100%) 100% no-repeat,
+    var(--foundry-line-strong);
+}
+
+html[data-foundry-ready="true"]:not([data-motion="reduced"]) .foundry-beats {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+}
+
+html[data-foundry-ready="true"]:not([data-motion="reduced"]) .foundry-beat {
+  position: absolute;
+  inset: 0;
+  min-height: 0;
+  padding:
+    calc(var(--foundry-header-height) + clamp(2.5rem, 7vh, 6rem))
+    var(--foundry-gutter)
+    clamp(4.5rem, 10vh, 7rem);
+  overflow: hidden;
+  border: 0;
+  background: transparent;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 120ms linear,
+    visibility 0s linear 120ms;
+}
+
+html[data-foundry-ready="true"]:not([data-motion="reduced"]) .foundry-beat[data-active="true"] {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition:
+    opacity 120ms linear,
+    visibility 0s;
+}
+
+html[data-foundry-ready="true"]:not([data-motion="reduced"]) .foundry-beat__copy {
+  width: min(62vw, 72rem);
+  margin: 0;
+}
+
+html[data-foundry-ready="true"]:not([data-motion="reduced"]) .foundry-beat--intention .foundry-beat__copy {
+  width: min(73vw, 85rem);
+}
+
+html[data-foundry-ready="true"]:not([data-motion="reduced"]) .foundry-beat--frontiers .foundry-beat__copy {
+  width: min(78vw, 76rem);
+}
+
+html[data-foundry-ready="true"]:not([data-motion="reduced"]) .foundry-beat--judgement .foundry-beat__copy {
+  width: min(68vw, 78rem);
+}
+
+html[data-foundry-ready="true"]:not([data-motion="reduced"]) .foundry-beat h1,
+html[data-foundry-ready="true"]:not([data-motion="reduced"]) .foundry-beat h2 {
+  text-shadow: 0 0.03em 0.03em rgb(255 255 255 / 13%);
+}
+
+html[data-foundry-ready="true"]:not([data-motion="reduced"]) .foundry-scroll-cue {
+  position: absolute;
+  z-index: 9;
+  right: var(--foundry-gutter);
+  bottom: 3.35rem;
+  display: flex;
+  gap: 0.8rem;
+  align-items: center;
+  color: rgb(22 24 23 / 56%);
+  font: 500 0.56rem/1 "Martian Mono", monospace;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  text-transform: uppercase;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 180ms ease;
+}
+
+html[data-foundry-ready="true"][data-active-beat="intention"]:not([data-motion="reduced"]) .foundry-scroll-cue {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+html[data-foundry-ready="true"][data-active-beat="judgement"]:not([data-motion="reduced"]) {
+  --proof-opacity: 1;
+}
+
+html[data-foundry-ready="true"][data-active-beat="judgement"]:not([data-motion="reduced"]) .foundry-proof-line__edge {
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    var(--foundry-amber) 8% 90%,
+    transparent
+  );
+}
+
+html[data-foundry-ready="true"][data-active-beat="judgement"]:not([data-motion="reduced"]) .foundry-core-label {
+  color: var(--foundry-amber);
+}
+
+html.foundry-fallback .foundry-track,
+html[data-renderer="fallback"] .foundry-track {
+  height: auto !important;
+  min-height: 0 !important;
+}
+
+html.foundry-fallback .foundry-stage,
+html[data-renderer="fallback"] .foundry-stage {
+  position: relative !important;
+  top: auto !important;
+  height: auto !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+}
+
+html.foundry-fallback #foundry-canvas,
+html.foundry-fallback .foundry-atmosphere,
+html.foundry-fallback .foundry-proof-line,
+html.foundry-fallback .foundry-core-label,
+html.foundry-fallback .foundry-progress-readout,
+html.foundry-fallback .foundry-scroll-cue,
+html[data-renderer="fallback"] #foundry-canvas,
+html[data-renderer="fallback"] .foundry-atmosphere,
+html[data-renderer="fallback"] .foundry-proof-line,
+html[data-renderer="fallback"] .foundry-core-label,
+html[data-renderer="fallback"] .foundry-progress-readout,
+html[data-renderer="fallback"] .foundry-scroll-cue {
+  display: none !important;
+}
+
+html.foundry-fallback .foundry-beats,
+html[data-renderer="fallback"] .foundry-beats {
+  position: relative !important;
+  inset: auto !important;
+}
+
+html.foundry-fallback .foundry-beat,
+html.foundry-fallback .foundry-beat[data-active="true"],
+html[data-renderer="fallback"] .foundry-beat,
+html[data-renderer="fallback"] .foundry-beat[data-active="true"] {
+  position: relative !important;
+  inset: auto !important;
+  min-height: 100svh !important;
+  overflow: visible !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  clip-path: none !important;
+  transform: none !important;
+  transition: none !important;
+}
+
+html.foundry-fallback .foundry-beat *,
+html[data-renderer="fallback"] .foundry-beat * {
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: none !important;
+}
+
+@media (max-width: 1180px) {
+  :root {
+    --foundry-gutter: clamp(1rem, 3vw, 2.5rem);
+  }
+
+  .foundry-header {
+    grid-template-columns: minmax(13rem, 1fr) minmax(17rem, 1.2fr) auto;
+  }
+
+  .foundry-navigation b {
+    display: none;
+  }
+
+  .foundry-navigation a {
+    padding-inline: 0.1rem;
+  }
+
+  .foundry-navigation a::after {
+    right: 36%;
+    left: 36%;
+  }
+
+  html[data-foundry-ready="true"]:not([data-motion="reduced"]) .foundry-beat__copy,
+  html[data-foundry-ready="true"]:not([data-motion="reduced"]) .foundry-beat--intention .foundry-beat__copy,
+  html[data-foundry-ready="true"]:not([data-motion="reduced"]) .foundry-beat--frontiers .foundry-beat__copy,
+  html[data-foundry-ready="true"]:not([data-motion="reduced"]) .foundry-beat--judgement .foundry-beat__copy {
+    width: min(76vw, 68rem);
+  }
+}
+
+@media (max-width: 760px) {
+  :root {
+    --foundry-header-height: 6.6rem;
+    --foundry-gutter: clamp(0.85rem, 4.5vw, 1.5rem);
+    --proof-x: 82%;
+  }
+
+  .foundry-header {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: 3.8rem 2.8rem;
+    min-height: var(--foundry-header-height);
+    padding-inline: var(--foundry-gutter);
+  }
+
+  .foundry-lockup img {
+    width: 1.85rem;
+    margin-right: 0.55rem;
+  }
+
+  .foundry-lockup span {
+    font-size: clamp(0.55rem, 2.55vw, 0.72rem);
+    letter-spacing: 0.075em;
+  }
+
+  .foundry-thesis-link--header {
+    gap: 0.4rem;
+    font-size: 0.55rem;
+  }
+
+  .foundry-thesis-link__long {
+    display: none;
+  }
+
+  .foundry-thesis-link__short {
+    display: inline;
+  }
+
+  .foundry-navigation {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    margin-inline: calc(var(--foundry-gutter) * -1);
+    border-top: 1px solid var(--foundry-line);
+  }
+
+  .foundry-navigation span {
+    font-size: 0.48rem;
+  }
+
+  .foundry-navigation a::after {
+    right: 38%;
+    left: 38%;
+  }
+
+  .foundry-beat {
+    padding:
+      calc(var(--foundry-header-height) + 2.8rem)
+      var(--foundry-gutter)
+      4.5rem;
+  }
+
+  .foundry-beat__index {
+    gap: 0.75rem;
+    margin-bottom: clamp(1.1rem, 3vh, 1.8rem);
+    font-size: 0.51rem;
+  }
+
+  .foundry-beat__index span:first-child {
+    width: 2.15rem;
+    height: 2.15rem;
+  }
+
+  .foundry-progression {
+    gap: 0.3rem 0.55rem;
+    margin-bottom: 0.8rem;
+    font-size: clamp(0.7rem, 3.4vw, 0.9rem);
+  }
+
+  .foundry-beat h1,
+  .foundry-beat h2,
+  .foundry-beat h1 {
+    max-width: 11ch;
+    font-size: clamp(2.9rem, 13.6vw, 5rem);
+    line-height: 0.84;
+  }
+
+  .foundry-beat__lede {
+    max-width: 34rem;
+    margin-top: clamp(1.2rem, 3.5vh, 2.2rem);
+    font-size: clamp(0.86rem, 3.55vw, 1.05rem);
+    line-height: 1.38;
+  }
+
+  .foundry-beat__note {
+    max-width: 31rem;
+    margin-top: 0.9rem;
+    font-size: clamp(0.56rem, 2.45vw, 0.69rem);
+    line-height: 1.48;
+  }
+
+  .foundry-loop {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-top: clamp(1.2rem, 3vh, 2rem);
+  }
+
+  .foundry-loop li {
+    gap: 0.7rem;
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--foundry-line);
+  }
+
+  .foundry-loop li:nth-child(2) {
+    border-right: 0;
+  }
+
+  .foundry-loop li:nth-child(n + 3) {
+    border-bottom: 0;
+  }
+
+  .foundry-loop strong {
+    font-size: clamp(0.72rem, 3.5vw, 0.95rem);
+  }
+
+  .foundry-frontiers {
+    display: block;
+    margin-top: clamp(1.2rem, 3vh, 2rem);
+  }
+
+  .foundry-frontiers article,
+  .foundry-frontiers article + article {
+    padding: 0.85rem 0;
+    border-left: 0;
+  }
+
+  .foundry-frontiers article + article {
+    border-top: 1px solid var(--foundry-line);
+  }
+
+  .foundry-frontiers article > p:first-child {
+    margin-bottom: 0.45rem;
+    font-size: 0.5rem;
+  }
+
+  .foundry-frontiers h3 {
+    font-size: clamp(1rem, 5vw, 1.35rem);
+  }
+
+  .foundry-frontiers article > p:last-child {
+    margin-top: 0.45rem;
+    font-size: clamp(0.65rem, 2.8vw, 0.8rem);
+    line-height: 1.35;
+  }
+
+  .foundry-scale {
+    margin-top: clamp(1.2rem, 3vh, 2rem);
+  }
+
+  .foundry-scale li {
+    grid-template-columns: minmax(3.5rem, 0.22fr) minmax(0, 1fr);
+    gap: 0.75rem;
+    padding: 0.7rem 0;
+  }
+
+  .foundry-scale span {
+    font-size: 0.48rem;
+  }
+
+  .foundry-scale strong {
+    font-size: clamp(0.78rem, 3.75vw, 1rem);
+  }
+
+  .foundry-thesis-link--final {
+    margin-top: clamp(1.2rem, 3vh, 2.2rem);
+    font-size: 0.62rem;
+  }
+
+  .foundry-footer {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    min-height: 12rem;
+  }
+
+  html[data-foundry-ready="true"]:not([data-motion="reduced"]) .foundry-stage {
+    min-height: 31rem;
+  }
+
+  html[data-foundry-ready="true"]:not([data-motion="reduced"]) .foundry-beat {
+    padding:
+      calc(var(--foundry-header-height) + clamp(1.35rem, 4vh, 2.5rem))
+      var(--foundry-gutter)
+      4.35rem;
+  }
+
+  html[data-foundry-ready="true"]:not([data-motion="reduced"]) .foundry-beat__copy,
+  html[data-foundry-ready="true"]:not([data-motion="reduced"]) .foundry-beat--intention .foundry-beat__copy,
+  html[data-foundry-ready="true"]:not([data-motion="reduced"]) .foundry-beat--frontiers .foundry-beat__copy,
+  html[data-foundry-ready="true"]:not([data-motion="reduced"]) .foundry-beat--judgement .foundry-beat__copy {
+    width: min(89vw, 38rem);
+  }
+
+  html[data-foundry-ready="true"]:not([data-motion="reduced"]) .foundry-core-label {
+    max-width: 65vw;
+    gap: 0.42rem;
+    overflow: hidden;
+    font-size: 0.43rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  html[data-foundry-ready="true"]:not([data-motion="reduced"]) .foundry-progress-readout {
+    font-size: 0.45rem;
+  }
+
+  html[data-foundry-ready="true"]:not([data-motion="reduced"]) .foundry-scroll-cue {
+    right: auto;
+    left: var(--foundry-gutter);
+    font-size: 0.48rem;
+  }
+}
+
+@media (max-width: 380px) {
+  :root {
+    --foundry-gutter: 0.8rem;
+  }
+
+  .foundry-lockup span {
+    font-size: 0.53rem;
+    letter-spacing: 0.055em;
+  }
+
+  .foundry-beat h1,
+  .foundry-beat h2,
+  .foundry-beat h1 {
+    font-size: clamp(2.65rem, 13vw, 3.15rem);
+  }
+}
+
+@media (max-height: 690px) and (min-width: 761px) {
+  html[data-foundry-ready="true"]:not([data-motion="reduced"]) .foundry-beat {
+    padding-top: calc(var(--foundry-header-height) + 1.35rem);
+    padding-bottom: 3.8rem;
+  }
+
+  html[data-foundry-ready="true"]:not([data-motion="reduced"]) .foundry-beat__index {
+    margin-bottom: 1.1rem;
+  }
+
+  html[data-foundry-ready="true"]:not([data-motion="reduced"]) .foundry-beat h1,
+  html[data-foundry-ready="true"]:not([data-motion="reduced"]) .foundry-beat h2 {
+    font-size: clamp(3.25rem, 8.2vh, 5.3rem);
+  }
+
+  html[data-foundry-ready="true"]:not([data-motion="reduced"]) .foundry-beat__lede {
+    margin-top: 1.25rem;
+    font-size: 0.94rem;
+  }
+
+  html[data-foundry-ready="true"]:not([data-motion="reduced"]) .foundry-beat__note,
+  html[data-foundry-ready="true"]:not([data-motion="reduced"]) .foundry-loop,
+  html[data-foundry-ready="true"]:not([data-motion="reduced"]) .foundry-frontiers,
+  html[data-foundry-ready="true"]:not([data-motion="reduced"]) .foundry-scale {
+    margin-top: 1rem;
+  }
+}
+
+@media (max-height: 620px) and (max-width: 760px) {
+  html[data-foundry-ready="true"]:not([data-motion="reduced"]) .foundry-beat {
+    padding-top: calc(var(--foundry-header-height) + 0.8rem);
+    padding-bottom: 3.45rem;
+  }
+
+  html[data-foundry-ready="true"]:not([data-motion="reduced"]) .foundry-beat__index {
+    margin-bottom: 0.65rem;
+  }
+
+  html[data-foundry-ready="true"]:not([data-motion="reduced"]) .foundry-beat__index span:first-child {
+    width: 1.7rem;
+    height: 1.7rem;
+  }
+
+  html[data-foundry-ready="true"]:not([data-motion="reduced"]) .foundry-beat h1,
+  html[data-foundry-ready="true"]:not([data-motion="reduced"]) .foundry-beat h2 {
+    font-size: clamp(2.35rem, 11.7vw, 3rem);
+  }
+
+  html[data-foundry-ready="true"]:not([data-motion="reduced"]) .foundry-beat__lede {
+    margin-top: 0.8rem;
+    font-size: 0.77rem;
+  }
+
+  html[data-foundry-ready="true"]:not([data-motion="reduced"]) .foundry-beat__note {
+    margin-top: 0.55rem;
+    font-size: 0.53rem;
+  }
+
+  html[data-foundry-ready="true"]:not([data-motion="reduced"]) .foundry-loop,
+  html[data-foundry-ready="true"]:not([data-motion="reduced"]) .foundry-frontiers,
+  html[data-foundry-ready="true"]:not([data-motion="reduced"]) .foundry-scale {
+    margin-top: 0.6rem;
+  }
+
+  html[data-foundry-ready="true"]:not([data-motion="reduced"]) .foundry-frontiers article {
+    padding-block: 0.48rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  html .foundry-track {
+    height: auto !important;
+    min-height: 0 !important;
+  }
+
+  html .foundry-stage {
+    position: relative !important;
+    top: auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+
+  html #foundry-canvas,
+  html .foundry-atmosphere,
+  html .foundry-proof-line,
+  html .foundry-core-label,
+  html .foundry-progress-readout,
+  html .foundry-scroll-cue {
+    display: none !important;
+  }
+
+  html .foundry-beats {
+    position: relative !important;
+    inset: auto !important;
+  }
+
+  html .foundry-beat,
+  html .foundry-beat[data-active="true"] {
+    position: relative !important;
+    inset: auto !important;
+    min-height: 100svh !important;
+    overflow: visible !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  html .foundry-mask,
+  html .foundry-mask > span {
+    overflow: visible;
+    transform: none !important;
+  }
+}
+
+@media print {
+  .foundry-header,
+  .foundry-atmosphere,
+  #foundry-canvas,
+  .foundry-proof-line,
+  .foundry-core-label,
+  .foundry-progress-readout,
+  .foundry-scroll-cue {
+    display: none !important;
+  }
+
+  .foundry-track,
+  .foundry-stage,
+  .foundry-beats,
+  .foundry-beat {
+    position: static !important;
+    display: block !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  .foundry-beat {
+    padding: 2cm 0;
+    break-inside: avoid;
+  }
+
+  .foundry-footer {
+    color: var(--foundry-graphite);
+    background: transparent;
+  }
+}

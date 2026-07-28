@@ -1,12 +1,9 @@
 <!doctype html>
 <html
   lang="en"
-  data-gpu="loading"
-  data-renderer="loading"
-  data-render-state="loading"
-  data-quality="high"
-  data-scene="hero"
-  data-scene-position="0.000"
+  data-foundry-ready="false"
+  data-active-beat="intention"
+  data-motion="full"
 >
 <head>
   <meta charset="utf-8">
@@ -55,18 +52,9 @@
     href="https://fonts.googleapis.com/css2?family=Mona+Sans:wdth,wght@75..125,300..800&family=Martian+Mono:wght@400;500&display=swap"
     rel="stylesheet"
   >
-  <script>
-    if (!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
-      document.documentElement.classList.add('motion-enabled');
-      window.__taicMotionFallback = window.setTimeout(() => {
-        document.documentElement.classList.remove('motion-enabled');
-      }, 2500);
-    }
-  </script>
   <link rel="stylesheet" href="./styles.css">
-  <link rel="stylesheet" href="./cinematic.css">
+  <link rel="stylesheet" href="./foundry.css">
   <script src="./site.js" type="module"></script>
-  <script src="./gpu-background.js" defer></script>
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -82,186 +70,313 @@
     }
   </script>
 </head>
-<body class="landing-page">
-  <a class="skip-link" href="#main-content">Skip to the company</a>
+<body class="foundry-page">
+  <a class="foundry-skip-link" href="#main-content">Skip to the thesis</a>
 
-  <div class="ambient-field optical-stage" data-optical-surface aria-hidden="true">
-    <canvas id="gpu-field"></canvas>
-    <div class="optical-stage__halation"></div>
-    <div class="optical-stage__vignette"></div>
-    <div class="optical-stage__grain"></div>
-  </div>
-
-  <header class="site-header">
-    <a class="brand" href="#top" aria-label="The Autonomous AI Company, home">
-      <img class="brand__mark" src="./logo-mark.svg" alt="">
-      <span class="brand__name">The Autonomous AI Company</span>
+  <header class="foundry-header">
+    <a class="foundry-lockup" href="#intention" aria-label="The Autonomous AI Company, home">
+      <img src="./logo-mark.svg" alt="">
+      <span>The Autonomous AI Company</span>
     </a>
 
-    <nav class="site-nav" aria-label="Primary navigation">
-      <a href="#model">Verification</a>
-      <a href="#frontiers">Frontiers</a>
-      <a href="#company">Scale</a>
+    <nav class="foundry-navigation" aria-label="Narrative chapters">
+      <a href="#intention" aria-label="Chapter 1, Intention">
+        <span>01</span><b>Intention</b>
+      </a>
+      <a href="#execution" aria-label="Chapter 2, Execution">
+        <span>02</span><b>Execution</b>
+      </a>
+      <a href="#verification" aria-label="Chapter 3, Verification">
+        <span>03</span><b>Verify</b>
+      </a>
+      <a href="#frontiers" aria-label="Chapter 4, Frontiers">
+        <span>04</span><b>Frontiers</b>
+      </a>
+      <a href="#scale" aria-label="Chapter 5, Scale">
+        <span>05</span><b>Scale</b>
+      </a>
+      <a href="#judgement" aria-label="Chapter 6, Judgement">
+        <span>06</span><b>Judge</b>
+      </a>
     </nav>
 
-    <a class="header-action" href="./thesis/">
-      <span class="header-action__long">Founding thesis</span>
-      <span class="header-action__short">Thesis</span>
+    <a class="foundry-thesis-link foundry-thesis-link--header" href="./thesis/">
+      <span class="foundry-thesis-link__long">Founding thesis</span>
+      <span class="foundry-thesis-link__short">Thesis</span>
       <span aria-hidden="true">↗</span>
     </a>
   </header>
 
   <main id="main-content">
-    <section class="hero" id="top" data-field-state="hero" aria-labelledby="hero-title">
-      <div class="hero__inner" data-motion-group="hero">
-        <p class="hero__progression" data-motion-item>
-          <span data-progress-step>Fewer people</span>
-          <span class="hero__arrow" aria-hidden="true">→</span>
-          <span data-progress-step>one person</span>
-          <span class="hero__arrow" aria-hidden="true">→</span>
-        </p>
+    <div class="foundry-track" data-foundry-track>
+      <div class="foundry-stage" data-foundry-stage>
+        <canvas id="foundry-canvas" aria-hidden="true"></canvas>
 
-        <h1
-          class="hero-title"
-          id="hero-title"
-          aria-label="From companies with fewer people, to one-person companies, to companies with zero standing employees."
-        >
-          <span class="hero-title__line" data-motion-item aria-hidden="true">Zero standing</span>
-          <span class="hero-title__line hero-title__line--final" data-motion-item aria-hidden="true">employees.</span>
-        </h1>
-
-        <div class="hero__statement" data-motion-item>
-          <p class="hero__lead">
-            Not because people lack value. Work has always been a proxy for value creation. AI changes that mechanism.
-          </p>
-          <p class="hero__guardrail">
-            Zero people is the direction. Value creation is the objective.
-          </p>
+        <div class="foundry-atmosphere" aria-hidden="true">
+          <div class="foundry-atmosphere__titanium"></div>
+          <div class="foundry-atmosphere__heat"></div>
+          <div class="foundry-atmosphere__grain"></div>
+          <div class="foundry-atmosphere__vignette"></div>
         </div>
 
-        <a class="text-action" href="./thesis/" data-motion-item>
-          Read the founding thesis <span aria-hidden="true">↗</span>
+        <div class="foundry-proof-line" data-proof-line aria-hidden="true">
+          <span class="foundry-proof-line__edge"></span>
+          <span class="foundry-proof-line__flare"></span>
+        </div>
+
+        <p class="foundry-core-label" data-core-label aria-hidden="true">
+          Intention
+          <span>→</span>
+          Execution
+          <span>→</span>
+          Verification
+          <span>→</span>
+          Value
+        </p>
+
+        <p class="foundry-progress-readout" data-progress-readout aria-hidden="true">
+          <span data-progress-current>01</span>
+          <span class="foundry-progress-readout__rule"></span>
+          <span>06</span>
+        </p>
+
+        <div class="foundry-beats">
+          <section
+            class="foundry-beat foundry-beat--intention"
+            id="intention"
+            data-beat
+            data-beat-index="0"
+            data-beat-name="intention"
+            data-active="true"
+            aria-labelledby="intention-title"
+          >
+            <div class="foundry-beat__copy">
+              <p class="foundry-beat__index">
+                <span>01</span>
+                <span>Intention</span>
+              </p>
+
+              <p class="foundry-progression" aria-label="Fewer people, then one person, then zero standing employees.">
+                <span data-kinetic-word>Fewer people</span>
+                <span aria-hidden="true">→</span>
+                <span data-kinetic-word>one person</span>
+                <span aria-hidden="true">→</span>
+              </p>
+
+              <h1 id="intention-title">
+                <span class="foundry-mask"><span data-mask-line>Zero standing</span></span>
+                <span class="foundry-mask foundry-mask--amber"><span data-mask-line>employees.</span></span>
+              </h1>
+
+              <p class="foundry-beat__lede">
+                Not because people lack value. Work has always been a proxy for value creation.
+                AI changes that mechanism.
+              </p>
+
+              <p class="foundry-beat__note">
+                Zero people is the direction. Value creation is the objective.
+              </p>
+            </div>
+          </section>
+
+          <section
+            class="foundry-beat foundry-beat--execution"
+            id="execution"
+            data-beat
+            data-beat-index="1"
+            data-beat-name="execution"
+            aria-labelledby="execution-title"
+          >
+            <div class="foundry-beat__copy">
+              <p class="foundry-beat__index">
+                <span>02</span>
+                <span>Execution</span>
+              </p>
+
+              <h2 id="execution-title">
+                <span class="foundry-mask"><span data-mask-line>The cost of turning</span></span>
+                <span class="foundry-mask"><span data-mask-line>intention into output</span></span>
+                <span class="foundry-mask foundry-mask--amber"><span data-mask-line>is collapsing.</span></span>
+              </h2>
+
+              <p class="foundry-beat__lede">
+                AI can already perform a meaningful share of work once supplied by people.
+                As capability expands, execution moves from assisted, to automated, to autonomous.
+              </p>
+
+              <p class="foundry-beat__note">
+                Software production becomes abundant. Scarcity moves to attention, trust,
+                distribution and ownership of feedback loops.
+              </p>
+            </div>
+          </section>
+
+          <section
+            class="foundry-beat foundry-beat--verification"
+            id="verification"
+            data-beat
+            data-beat-index="2"
+            data-beat-name="verification"
+            aria-labelledby="verification-title"
+          >
+            <div class="foundry-beat__copy">
+              <p class="foundry-beat__index">
+                <span>03</span>
+                <span>Verification</span>
+              </p>
+
+              <h2 id="verification-title">
+                <span class="foundry-mask"><span data-mask-line>Execution is not value.</span></span>
+                <span class="foundry-mask foundry-mask--amber"><span data-mask-line>Verification makes it value.</span></span>
+              </h2>
+
+              <ol class="foundry-loop" aria-label="The value creation loop">
+                <li><span>01</span><strong>Intention</strong></li>
+                <li><span>02</span><strong>Execution</strong></li>
+                <li><span>03</span><strong>Validation</strong></li>
+                <li><span>04</span><strong>Value</strong></li>
+              </ol>
+
+              <p class="foundry-beat__note">
+                Identify a valuable outcome. Close its execution-validation loop.
+                Make verification cheap. Build distribution and feedback around it.
+              </p>
+            </div>
+          </section>
+
+          <section
+            class="foundry-beat foundry-beat--frontiers"
+            id="frontiers"
+            data-beat
+            data-beat-index="3"
+            data-beat-name="frontiers"
+            aria-labelledby="frontiers-title"
+          >
+            <div class="foundry-beat__copy">
+              <p class="foundry-beat__index">
+                <span>04</span>
+                <span>Two frontiers</span>
+              </p>
+
+              <h2 id="frontiers-title">
+                <span class="foundry-mask"><span data-mask-line>Same intelligence.</span></span>
+                <span class="foundry-mask foundry-mask--amber"><span data-mask-line>Different cost of proof.</span></span>
+              </h2>
+
+              <div class="foundry-frontiers" aria-label="Applications and research">
+                <article>
+                  <p>Applications</p>
+                  <h3>Software has been solved.</h3>
+                  <p>
+                    Digital loops can generate, run, test and revise. Verification is already cheap
+                    enough for specialized software to reach smaller niches.
+                  </p>
+                </article>
+
+                <article>
+                  <p>Research</p>
+                  <h3>Verification is next.</h3>
+                  <p>
+                    Scientific loops still spend capital and time on physical iteration.
+                    The next frontier is making proof faster and increasingly autonomous.
+                  </p>
+                </article>
+              </div>
+            </div>
+          </section>
+
+          <section
+            class="foundry-beat foundry-beat--scale"
+            id="scale"
+            data-beat
+            data-beat-index="4"
+            data-beat-name="scale"
+            aria-labelledby="scale-title"
+          >
+            <div class="foundry-beat__copy">
+              <p class="foundry-beat__index">
+                <span>05</span>
+                <span>Exploration function</span>
+              </p>
+
+              <h2 id="scale-title">
+                <span class="foundry-mask"><span data-mask-line>Company.</span></span>
+                <span class="foundry-mask"><span data-mask-line>CRO.</span></span>
+                <span class="foundry-mask foundry-mask--amber"><span data-mask-line>Lab.</span></span>
+              </h2>
+
+              <ol class="foundry-scale" aria-label="The company, contract research organization and lab progression">
+                <li>
+                  <span>Now</span>
+                  <strong>Zero-people company</strong>
+                </li>
+                <li>
+                  <span>Next</span>
+                  <strong>Zero-people CRO</strong>
+                </li>
+                <li>
+                  <span>Frontier</span>
+                  <strong>Zero-people lab</strong>
+                </li>
+              </ol>
+
+              <p class="foundry-beat__note">
+                Capital converts into progress at the rate money buys iteration cycles.
+                The Autonomous AI Company is my exploration function for closing those loops.
+              </p>
+            </div>
+          </section>
+
+          <section
+            class="foundry-beat foundry-beat--judgement"
+            id="judgement"
+            data-beat
+            data-beat-index="5"
+            data-beat-name="judgement"
+            aria-labelledby="judgement-title"
+          >
+            <div class="foundry-beat__copy">
+              <p class="foundry-beat__index">
+                <span>06</span>
+                <span>Founder boundary</span>
+              </p>
+
+              <h2 id="judgement-title">
+                <span class="foundry-mask"><span data-mask-line>Everything delegated.</span></span>
+                <span class="foundry-mask foundry-mask--amber"><span data-mask-line>Except judgement.</span></span>
+              </h2>
+
+              <p class="foundry-beat__lede">
+                The AI-native founder decides which outcomes matter, establishes boundaries
+                and remains accountable for irreversible decisions.
+              </p>
+
+              <a class="foundry-thesis-link foundry-thesis-link--final" href="./thesis/">
+                <span>Read the complete whitepaper</span>
+                <span aria-hidden="true">↗</span>
+              </a>
+
+              <p class="foundry-beat__note">
+                Founder-led. Agent-operated. Accountable for outcomes.
+              </p>
+            </div>
+          </section>
+        </div>
+
+        <a class="foundry-scroll-cue" href="#execution">
+          <span>Enter the loop</span>
+          <span aria-hidden="true">↓</span>
         </a>
       </div>
-
-      <a class="scroll-cue" href="#model">
-        <span>Continue</span>
-        <span class="scroll-cue__line" aria-hidden="true"></span>
-      </a>
-    </section>
-
-    <section class="mechanism-section" id="model" data-field-state="mechanism" aria-labelledby="mechanism-title">
-      <div class="scene-frame scene-frame--loop" data-motion-group="loop">
-        <p class="scene-index" data-motion-item>01 / Verification</p>
-        <h2 id="mechanism-title" data-motion-item>
-          Execution is not value.
-          <strong>Verification makes it value.</strong>
-        </h2>
-
-        <ol class="loop-sequence" aria-label="Intention, execution, validation, value">
-          <li data-loop-phase="0" data-motion-item>
-            <span>01</span>
-            <strong>Intention</strong>
-          </li>
-          <li data-loop-phase="1" data-motion-item>
-            <span>02</span>
-            <strong>Execution</strong>
-          </li>
-          <li data-loop-phase="2" data-motion-item>
-            <span>03</span>
-            <strong>Validation</strong>
-          </li>
-          <li data-loop-phase="3" data-motion-item>
-            <span>04</span>
-            <strong>Value</strong>
-          </li>
-        </ol>
-
-        <p class="scene-copy" data-motion-item>
-          AI collapses the cost of turning intention into output. The first move is to close the execution-validation loop.
-        </p>
-      </div>
-    </section>
-
-    <section class="frontiers-section" id="frontiers" data-field-state="frontiers" aria-labelledby="frontiers-title">
-      <div class="scene-frame scene-frame--frontiers" data-motion-group="frontiers">
-        <p class="scene-index" data-motion-item>02 / Two frontiers</p>
-        <h2 id="frontiers-title" data-motion-item>
-          Same intelligence.
-          <strong>Different cost of proof.</strong>
-        </h2>
-
-        <div class="frontier-pair">
-          <article data-motion-item>
-            <p class="frontier-name">Applications</p>
-            <h3>Software has been solved.</h3>
-            <p>Digital loops make verification cheap enough to automate.</p>
-          </article>
-
-          <article data-motion-item>
-            <p class="frontier-name">Research</p>
-            <h3>Verification is next.</h3>
-            <p>Physical loops still spend capital and time on every iteration.</p>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <section class="company-section" id="company" data-field-state="company" aria-labelledby="company-title">
-      <div class="company-frame" data-motion-group="company-path">
-        <div class="company-frame__heading">
-          <p class="scene-index" data-motion-item>03 / Scale</p>
-          <h2 id="company-title" data-motion-item>My exploration function.</h2>
-        </div>
-
-        <ol
-          class="scale-sequence"
-          aria-label="Zero-people company, zero-people contract research organization, zero-people lab"
-        >
-          <li data-company-phase="0" data-motion-item>
-            <span>Now</span>
-            <strong>Company</strong>
-          </li>
-          <li data-company-phase="1" data-motion-item>
-            <span>Next</span>
-            <strong>CRO</strong>
-          </li>
-          <li data-company-phase="2" data-motion-item>
-            <span>Frontier</span>
-            <strong>Lab</strong>
-          </li>
-        </ol>
-
-        <p class="company-frame__copy" data-motion-item>
-          From a zero-people company, to zero-people contract research organizations, to a zero-people lab.
-        </p>
-      </div>
-
-      <div class="founder-boundary" data-motion-group="founder-boundary">
-        <div class="founder-boundary__line" aria-hidden="true"></div>
-        <div class="founder-boundary__content">
-          <p class="founder-boundary__label" data-motion-item>Founder boundary</p>
-          <p class="founder-boundary__statement" data-motion-item>
-            Eventually, everything delegated.
-            <strong>Except judgement.</strong>
-          </p>
-          <p class="founder-boundary__detail" data-motion-item>
-            The founder chooses outcomes, sets boundaries and remains accountable for irreversible decisions.
-          </p>
-          <a class="text-action text-action--warm" href="./thesis/" data-motion-item>
-            Read the complete whitepaper <span aria-hidden="true">↗</span>
-          </a>
-        </div>
-      </div>
-    </section>
+    </div>
   </main>
 
-  <footer class="site-footer">
-    <a class="site-footer__brand" href="#top">
+  <footer class="foundry-footer">
+    <a class="foundry-lockup foundry-lockup--footer" href="#intention">
       <img src="./logo-mark.svg" alt="">
       <span>The Autonomous AI Company</span>
     </a>
-    <p>Founder-led. Agent-operated. Accountable for outcomes.</p>
+    <p>Founder-led. Agent-operated.</p>
     <p>© 2026 Dante Perea</p>
   </footer>
 </body>
