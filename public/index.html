@@ -1,5 +1,13 @@
 <!doctype html>
-<html lang="en" data-gpu="loading">
+<html
+  lang="en"
+  data-gpu="loading"
+  data-renderer="loading"
+  data-render-state="loading"
+  data-quality="high"
+  data-scene="hero"
+  data-scene-position="0.000"
+>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -32,7 +40,7 @@
     }
   </script>
   <link rel="stylesheet" href="./styles.css">
-  <script src="./site.js" defer></script>
+  <script src="./site.js" type="module"></script>
   <script src="./gpu-background.js" defer></script>
   <script type="application/ld+json">
     {
@@ -55,8 +63,55 @@
   <div class="ambient-field" aria-hidden="true">
     <canvas id="gpu-field"></canvas>
     <div class="field-veil"></div>
-    <canvas id="agent-swarm"></canvas>
-    <div class="field-grid"></div>
+    <svg class="cinematic-overlay" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <linearGradient id="proof-gradient" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#9b78ff"></stop>
+          <stop offset=".52" stop-color="#d8dcff"></stop>
+          <stop offset="1" stop-color="#17e5c2"></stop>
+        </linearGradient>
+        <radialGradient id="anchor-gradient">
+          <stop offset="0" stop-color="#ffd272"></stop>
+          <stop offset=".28" stop-color="#f4a83b" stop-opacity=".82"></stop>
+          <stop offset="1" stop-color="#f4a83b" stop-opacity="0"></stop>
+        </radialGradient>
+        <filter id="proof-glow" x="-100%" y="-100%" width="300%" height="300%">
+          <feGaussianBlur stdDeviation="5" result="blur"></feGaussianBlur>
+          <feMerge>
+            <feMergeNode in="blur"></feMergeNode>
+            <feMergeNode in="SourceGraphic"></feMergeNode>
+          </feMerge>
+        </filter>
+      </defs>
+
+      <g class="proof-layer proof-layer--hero">
+        <path
+          class="proof-trace proof-trace--dim"
+          d="M140 36 C284 48 330 188 520 188 S760 94 924 190 1025 353 1138 382"
+        ></path>
+        <path
+          class="proof-trace proof-trace--live"
+          data-proof-signal
+          pathLength="1"
+          d="M140 36 C284 48 330 188 520 188 S760 94 924 190 1025 353 1138 382"
+        ></path>
+        <circle class="proof-circuit proof-circuit--outer" cx="1180" cy="420" r="180"></circle>
+        <circle class="proof-circuit proof-circuit--inner" cx="1180" cy="420" r="118"></circle>
+        <path
+          class="proof-seal"
+          data-proof-signal
+          pathLength="1"
+          d="M1295 282 C1365 345 1378 445 1323 520"
+        ></path>
+      </g>
+
+      <g class="founder-anchor" data-founder-anchor>
+        <circle class="founder-anchor__glow" cx="1440" cy="748" r="96"></circle>
+        <circle class="founder-anchor__boundary" cx="1440" cy="748" r="34"></circle>
+        <circle class="founder-anchor__core" cx="1440" cy="748" r="5"></circle>
+      </g>
+    </svg>
+    <div class="field-grain"></div>
   </div>
 
   <header class="site-header">
@@ -111,10 +166,6 @@
         </div>
       </div>
 
-      <div class="render-label" aria-hidden="true">
-        <span></span>
-        Local WebGL
-      </div>
       <a class="scroll-cue" href="#model">The loop <span aria-hidden="true">↓</span></a>
     </section>
 
@@ -125,24 +176,45 @@
           <h2 id="mechanism-title" data-motion-item style="--step: 1">Close valuable loops.</h2>
         </div>
 
-        <ol class="value-loop" aria-label="Intention, execution, validation, value">
-          <li data-motion-item style="--step: 2; --node: 0">
-            <span>01</span>
-            <strong>Intention</strong>
-          </li>
-          <li data-motion-item style="--step: 3; --node: 1">
-            <span>02</span>
-            <strong>Execution</strong>
-          </li>
-          <li data-motion-item style="--step: 4; --node: 2">
-            <span>03</span>
-            <strong>Validation</strong>
-          </li>
-          <li data-motion-item style="--step: 5; --node: 3">
-            <span>04</span>
-            <strong>Value</strong>
-          </li>
-        </ol>
+        <div class="value-loop-shell">
+          <svg class="value-loop__circuit" viewBox="0 0 1200 280" aria-hidden="true">
+            <path
+              class="value-loop__track"
+              d="M92 140 C92 62 210 36 370 36 H830 C990 36 1108 62 1108 140 S990 244 830 244 H370 C210 244 92 218 92 140Z"
+            ></path>
+            <path
+              class="value-loop__proof"
+              id="value-proof-path"
+              data-proof-signal
+              pathLength="1"
+              d="M92 140 C92 62 210 36 370 36 H830 C990 36 1108 62 1108 140 S990 244 830 244 H370 C210 244 92 218 92 140Z"
+            ></path>
+            <g class="value-loop__gate">
+              <path d="M812 12 V268"></path>
+              <path d="M838 12 V268"></path>
+            </g>
+            <circle class="value-loop__token" data-loop-token cx="92" cy="140" r="7"></circle>
+          </svg>
+
+          <ol class="value-loop" aria-label="Intention, execution, validation, value">
+            <li data-motion-item style="--step: 2; --node: 0">
+              <span>01</span>
+              <strong>Intention</strong>
+            </li>
+            <li data-motion-item style="--step: 3; --node: 1">
+              <span>02</span>
+              <strong>Execution</strong>
+            </li>
+            <li class="value-loop__validation" data-motion-item style="--step: 4; --node: 2">
+              <span>03</span>
+              <strong>Validation</strong>
+            </li>
+            <li class="value-loop__value" data-motion-item style="--step: 5; --node: 3">
+              <span>04</span>
+              <strong>Value</strong>
+            </li>
+          </ol>
+        </div>
 
         <p class="mechanism-copy" data-motion-item style="--step: 6">
           AI is collapsing the cost of turning intention into valuable output. Which valuable loop can we close first?
@@ -158,8 +230,44 @@
         </div>
 
         <div class="frontier-row">
+          <svg class="frontier-proof" viewBox="0 0 1200 380" aria-hidden="true">
+            <defs>
+              <linearGradient id="frontier-gradient" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0" stop-color="#9b78ff"></stop>
+                <stop offset=".52" stop-color="#d8dcff"></stop>
+                <stop offset="1" stop-color="#17e5c2"></stop>
+              </linearGradient>
+              <filter id="frontier-glow" x="-100%" y="-100%" width="300%" height="300%">
+                <feGaussianBlur stdDeviation="4" result="blur"></feGaussianBlur>
+                <feMerge>
+                  <feMergeNode in="blur"></feMergeNode>
+                  <feMergeNode in="SourceGraphic"></feMergeNode>
+                </feMerge>
+              </filter>
+            </defs>
+            <path
+              class="frontier-proof__track"
+              d="M72 190 C238 190 332 70 490 190 S862 310 1128 190"
+            ></path>
+            <path
+              class="frontier-proof__live"
+              id="frontier-proof-path"
+              data-proof-signal
+              pathLength="1"
+              d="M72 190 C238 190 332 70 490 190 S862 310 1128 190"
+            ></path>
+            <g class="frontier-proof__gate">
+              <path d="M586 34 V346"></path>
+              <path d="M614 34 V346"></path>
+            </g>
+            <circle class="frontier-proof__token" data-frontier-token cx="72" cy="190" r="7"></circle>
+          </svg>
+
           <article data-motion-item style="--step: 2">
             <p class="frontier-label">Applications</p>
+            <div class="frontier-instrument frontier-instrument--applications" aria-hidden="true">
+              <i></i><i></i><i></i>
+            </div>
             <h3>Software has been solved.</h3>
             <p>
               Engineering still matters. Workflows represented and verified in software can move toward autonomy.
@@ -168,11 +276,16 @@
 
           <article data-motion-item style="--step: 3">
             <p class="frontier-label">Research</p>
+            <div class="frontier-instrument frontier-instrument--research" aria-hidden="true">
+              <i></i><i></i><i></i>
+            </div>
             <h3>Verification is next.</h3>
             <p>
               Make scientific verification cheaper, faster and increasingly autonomous.
             </p>
           </article>
+
+          <p class="frontier-proof__label" aria-hidden="true">Verification gate</p>
         </div>
       </div>
     </section>
@@ -184,23 +297,46 @@
           <h2 id="company-title" data-motion-item style="--step: 1">My exploration function.</h2>
         </div>
 
-        <ol class="company-path" aria-label="Company, contract research organizations, lab">
-          <li data-motion-item style="--step: 2">
-            <span>Now</span>
-            <strong>Zero-people company</strong>
-          </li>
-          <li data-motion-item style="--step: 3">
-            <span>Next</span>
-            <strong>Zero-people contract research organizations</strong>
-          </li>
-          <li data-motion-item style="--step: 4">
-            <span>Frontier</span>
-            <strong>Zero-people lab</strong>
-          </li>
-        </ol>
+        <div class="scale-journey">
+          <div class="scale-system" aria-hidden="true">
+            <svg class="scale-system__rings" viewBox="0 0 360 360">
+              <circle class="scale-system__orbit scale-system__orbit--company" cx="180" cy="180" r="48"></circle>
+              <circle class="scale-system__orbit scale-system__orbit--cro" cx="180" cy="180" r="104"></circle>
+              <circle class="scale-system__orbit scale-system__orbit--lab" cx="180" cy="180" r="164"></circle>
+              <path class="scale-system__relay" d="M180 132 V16 M132 180 H16 M228 180 H344 M180 228 V344"></path>
+              <g class="scale-system__nodes">
+                <circle cx="180" cy="16" r="4"></circle>
+                <circle cx="16" cy="180" r="4"></circle>
+                <circle cx="344" cy="180" r="4"></circle>
+                <circle cx="180" cy="344" r="4"></circle>
+              </g>
+              <circle class="scale-system__core" cx="180" cy="180" r="7"></circle>
+            </svg>
+            <p>Operational scale <span data-scale-index>01</span></p>
+          </div>
+
+          <ol class="company-path" aria-label="Company, contract research organizations, lab">
+            <li data-company-phase="0" data-motion-item style="--step: 2">
+              <span>Now</span>
+              <strong>Zero-people company</strong>
+            </li>
+            <li data-company-phase="1" data-motion-item style="--step: 3">
+              <span>Next</span>
+              <strong>Zero-people contract research organizations</strong>
+            </li>
+            <li data-company-phase="2" data-motion-item style="--step: 4">
+              <span>Frontier</span>
+              <strong>Zero-people lab</strong>
+            </li>
+          </ol>
+        </div>
       </div>
 
       <div class="founder-boundary" data-motion-group="founder-boundary">
+        <p class="founder-boundary__label" data-motion-item style="--step: 0">
+          <span aria-hidden="true"></span>
+          Judgement / accountability
+        </p>
         <p class="founder-boundary__statement" data-motion-item style="--step: 0">
           Eventually, everything delegated.
           <strong>Except judgement.</strong>
