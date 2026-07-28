@@ -20,8 +20,16 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 1100 } },
     },
     {
+      name: 'webkit-desktop',
+      use: {
+        ...devices['Desktop Safari'],
+        browserName: 'webkit',
+        viewport: { width: 1440, height: 1100 },
+      },
+    },
+    {
       name: 'mobile-safari',
-      use: { ...devices['iPhone 15'] },
+      use: { ...devices['iPhone 15'], browserName: 'webkit' },
     },
   ],
 });

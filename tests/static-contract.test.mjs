@@ -82,32 +82,44 @@ test('restores the local WebGL field without the obsolete handoff runtime', asyn
   const js = await fileText('site.js');
   const gpu = await fileText('gpu-background.js');
 
-  assert.match(html, /<html lang="en"[^>]*>/);
+  assert.match(html, /<html[\s\S]*?lang="en"[^>]*>/);
   assert.match(html, /<title>The Autonomous AI Company<\/title>/);
   assert.match(html, /<link rel="stylesheet" href="\.\/styles\.css">/);
-  assert.match(html, /<script src="\.\/site\.js" defer><\/script>/);
+  assert.match(html, /<script src="\.\/site\.js" type="module"><\/script>/);
   assert.match(html, /<script src="\.\/gpu-background\.js" defer><\/script>/);
   assert.match(html, /<main id="main-content">/);
   assert.match(html, /id="gpu-field"/);
-  assert.match(html, /id="agent-swarm"/);
+  assert.match(html, /class="cinematic-overlay"/);
+  assert.match(html, /data-proof-signal/);
+  assert.doesNotMatch(html, /id="agent-swarm"/);
   assert.doesNotMatch(html, /support\.js/);
   assert.doesNotMatch(html, /class Component extends DCLogic/);
   assert.doesNotMatch(html, /this field is live inference/i);
   assert.doesNotMatch(html, /tokens reasoned/i);
   assert.match(html, /class="brand__name">The Autonomous AI Company<\/span>/);
   assert.match(thesis, /class="brand__name">The Autonomous AI Company<\/span>/);
+  assert.doesNotMatch(thesis, /site\.js/);
   assert.doesNotMatch(html, /class="brand__wordmark"/);
   assert.doesNotMatch(thesis, /class="brand__wordmark"/);
   assert.match(css, /prefers-reduced-motion/);
   assert.match(css, /:focus-visible/);
   assert.match(css, /oklch\(/);
-  assert.match(js, /IntersectionObserver/);
+  assert.match(js, /ScrollTrigger/);
   assert.match(html, /classList\.add\(['"]motion-enabled['"]\)/);
+  assert.match(gpu, /getContext\(['"]webgl2['"]/);
   assert.match(gpu, /getContext\(['"]webgl['"]/);
+  assert.match(gpu, /devicePixelRatio/);
+  assert.match(gpu, /retryWithWebGL1/);
   assert.match(gpu, /gl\.FRAGMENT_SHADER/);
   assert.match(gpu, /requestAnimationFrame/);
   assert.match(gpu, /prefers-reduced-motion/);
   assert.match(gpu, /visibilitychange/);
+  assert.match(gpu, /webglcontextlost/);
+  assert.match(gpu, /webglcontextrestored/);
+  assert.match(gpu, /data-renderer|dataset\.renderer/);
+  assert.match(js, /--scene-position/);
+  assert.match(js, /--document-progress/);
+  assert.match(js, /addEventListener\(['"]change['"]/);
 });
 
 test('keeps the brand assets and removes the obsolete handoff runtime', async () => {

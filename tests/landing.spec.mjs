@@ -52,7 +52,7 @@ test('keeps the brand lockup on one horizontal line', async ({ page }) => {
   }
 });
 
-test('composes the landing as four narrative screens', async ({ page }) => {
+test('composes the landing as four concise chapters with a dedicated accountability climax', async ({ page }) => {
   await page.setViewportSize({ width: 1728, height: 995 });
   await page.goto('/');
 
@@ -64,9 +64,20 @@ test('composes the landing as four narrative screens', async ({ page }) => {
   );
 
   expect(screens.map((screen) => screen.id)).toEqual(['top', 'model', 'frontiers', 'company']);
-  for (const screen of screens) {
+  for (const screen of screens.slice(0, 3)) {
     expect(screen.height, `${screen.id} should read as one screen`).toBeGreaterThanOrEqual(850);
     expect(screen.height, `${screen.id} should not become a long essay`).toBeLessThanOrEqual(1100);
+  }
+
+  expect(screens.at(-1).height).toBeGreaterThanOrEqual(1700);
+  expect(screens.at(-1).height).toBeLessThanOrEqual(2200);
+
+  for (const selector of ['.company-frame', '.founder-boundary']) {
+    const frameHeight = await page.locator(selector).evaluate((element) =>
+      element.getBoundingClientRect().height,
+    );
+    expect(frameHeight, `${selector} should own one deliberate frame`).toBeGreaterThanOrEqual(850);
+    expect(frameHeight, `${selector} should remain concise`).toBeLessThanOrEqual(1100);
   }
 });
 
@@ -80,21 +91,16 @@ test('orchestrates each landing argument as a one-shot motion group', async ({ p
   }
 });
 
-test('does not animate offscreen sections during GPU startup', async ({ page }) => {
+test('starts the cinematic narrative with only the hero scene active', async ({ page }) => {
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   await page.waitForTimeout(100);
 
-  const activeGroups = await page.evaluate(() =>
-    document
-      .getAnimations()
-      .filter((animation) => animation.playState === 'running')
-      .map((animation) =>
-        animation.effect?.target?.closest?.('[data-motion-group]')?.dataset.motionGroup,
-      )
-      .filter(Boolean),
-  );
+  await expect(page.locator('html')).toHaveAttribute('data-scene', 'hero');
+  const activeGroups = await page
+    .locator('[data-motion-group].is-visible')
+    .evaluateAll((groups) => groups.map((group) => group.dataset.motionGroup));
 
-  expect([...new Set(activeGroups)]).toEqual(['hero']);
+  expect(activeGroups).toEqual(['hero']);
 });
 
 test('fails open if the motion controller cannot load', async ({ page }) => {
@@ -111,34 +117,288 @@ test('restores the GPU field as a rendered visual layer', async ({ page }) => {
   await page.goto('/');
 
   await expect(page.locator('#gpu-field')).toBeAttached();
-  await expect(page.locator('#agent-swarm')).toBeAttached();
+  await expect(page.locator('#agent-swarm')).toHaveCount(0);
+  await expect(page.locator('.cinematic-overlay')).toBeAttached();
   await expect(page.locator('html')).toHaveAttribute('data-gpu', 'ready');
+  await expect(page.locator('html')).toHaveAttribute('data-renderer', /webgl2|webgl1/);
+  await expect(page.locator('html')).toHaveAttribute('data-quality', /high|balanced|low/);
 
   const canvasState = await page.evaluate(() => {
     const field = document.querySelector('#gpu-field');
-    const swarm = document.querySelector('#agent-swarm');
-    const gl = field.getContext('webgl');
+    const gl = field.getContext('webgl2') || field.getContext('webgl');
     return {
       fieldWidth: field.width,
       fieldHeight: field.height,
-      swarmWidth: swarm.width,
-      swarmHeight: swarm.height,
       hasLinkedProgram: Boolean(gl.getParameter(gl.CURRENT_PROGRAM)),
     };
   });
 
   expect(canvasState.fieldWidth).toBeGreaterThan(0);
   expect(canvasState.fieldHeight).toBeGreaterThan(0);
-  expect(canvasState.swarmWidth).toBeGreaterThan(0);
-  expect(canvasState.swarmHeight).toBeGreaterThan(0);
   expect(canvasState.hasLinkedProgram).toBeTruthy();
+});
+
+test('scrubs one proof signal reversibly through the four thesis scenes', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/');
+
+  await expect(page.locator('html')).toHaveAttribute('data-scene', 'hero');
+  const topPosition = Number(await page.locator('html').getAttribute('data-scene-position'));
+
+  await page.locator('#model').scrollIntoViewIfNeeded();
+  await expect(page.locator('html')).toHaveAttribute('data-scene', 'loop');
+  const loopPosition = Number(await page.locator('html').getAttribute('data-scene-position'));
+
+  await page.locator('#frontiers').scrollIntoViewIfNeeded();
+  await expect(page.locator('html')).toHaveAttribute('data-scene', 'frontiers');
+  const frontierPosition = Number(await page.locator('html').getAttribute('data-scene-position'));
+
+  await page.locator('#company').scrollIntoViewIfNeeded();
+  await expect(page.locator('html')).toHaveAttribute('data-scene', 'company');
+  const companyPosition = Number(await page.locator('html').getAttribute('data-scene-position'));
+
+  expect(topPosition).toBeLessThan(loopPosition);
+  expect(loopPosition).toBeLessThan(frontierPosition);
+  expect(frontierPosition).toBeLessThan(companyPosition);
+
+  await page.locator('#top').scrollIntoViewIfNeeded();
+  await expect(page.locator('html')).toHaveAttribute('data-scene', 'hero');
+  const returnedPosition = Number(await page.locator('html').getAttribute('data-scene-position'));
+  expect(returnedPosition).toBeLessThan(loopPosition);
+
+  const proofState = await page.evaluate(() => ({
+    documentProgress: getComputedStyle(document.documentElement)
+      .getPropertyValue('--document-progress')
+      .trim(),
+    signalCount: document.querySelectorAll('[data-proof-signal]').length,
+    diagnostics: window.__TAIC_CINEMATIC__?.getSnapshot?.(),
+  }));
+
+  expect(proofState.documentProgress).not.toBe('');
+  expect(proofState.signalCount).toBeGreaterThan(0);
+  expect(proofState.diagnostics?.scene).toBe('hero');
+});
+
+test('authors live reduced-motion and context-loss states', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('html')).toHaveAttribute('data-render-state', 'running');
+
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await expect(page.locator('html')).toHaveAttribute('data-motion', 'reduced');
+  await expect(page.locator('html')).toHaveAttribute('data-render-state', 'static');
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await expect(page.locator('html')).toHaveAttribute('data-motion', 'full');
+  await expect(page.locator('html')).toHaveAttribute('data-render-state', 'running');
+
+  const prevented = await page.locator('#gpu-field').evaluate((canvas) => {
+    const lost = new Event('webglcontextlost', { cancelable: true });
+    canvas.dispatchEvent(lost);
+    return lost.defaultPrevented;
+  });
+  expect(prevented).toBeTruthy();
+  await expect(page.locator('html')).toHaveAttribute('data-gpu', 'context-lost');
+  await expect(page.locator('html')).toHaveAttribute('data-render-state', 'paused');
+
+  await page.locator('#gpu-field').evaluate((canvas) => {
+    canvas.dispatchEvent(new Event('webglcontextrestored'));
+  });
+  await expect(page.locator('html')).toHaveAttribute('data-gpu', 'ready');
+  await expect(page.locator('html')).toHaveAttribute('data-render-state', 'running');
+});
+
+test('rebuilds GPU resources cleanly after a real context loss', async ({ page }) => {
+  const consoleMessages = [];
+  page.on('console', (message) => {
+    consoleMessages.push(message.text());
+  });
+
+  await page.goto('/');
+  await expect(page.locator('html')).toHaveAttribute('data-gpu', 'ready');
+
+  const supportsContextLoss = await page.locator('#gpu-field').evaluate((canvas) => {
+    const context = canvas.getContext('webgl2') || canvas.getContext('webgl');
+    const extension = context?.getExtension('WEBGL_lose_context');
+    if (!extension) {
+      return false;
+    }
+
+    window.__taicContextLossExtension = extension;
+    extension.loseContext();
+    return true;
+  });
+
+  test.skip(!supportsContextLoss, 'WEBGL_lose_context is unavailable in this browser');
+  await expect(page.locator('html')).toHaveAttribute('data-gpu', 'context-lost');
+
+  await page.evaluate(() => window.__taicContextLossExtension.restoreContext());
+  await expect(page.locator('html')).toHaveAttribute('data-gpu', 'ready');
+  await expect(page.locator('html')).toHaveAttribute('data-render-state', 'running');
+  await expect
+    .poll(() => page.evaluate(() => window.__TAIC_CINEMATIC__.getSnapshot().frames))
+    .toBeGreaterThan(1);
+
+  expect(
+    consoleMessages.filter((message) =>
+      /INVALID_OPERATION.*delete|delete: object does not belong to this context/i.test(message),
+    ),
+  ).toEqual([]);
+});
+
+test('freezes the reduced-motion GPU until its framebuffer needs resizing', async ({ browser }) => {
+  const context = await browser.newContext({
+    reducedMotion: 'reduce',
+    viewport: { width: 320, height: 240 },
+    deviceScaleFactor: 2,
+  });
+  const page = await context.newPage();
+  await page.goto('/');
+  await expect(page.locator('html')).toHaveAttribute('data-render-state', 'static');
+  await page.waitForTimeout(120);
+
+  const initial = await page.evaluate(() => window.__TAIC_CINEMATIC__.getSnapshot());
+  const qualityCaps = { low: 320_000, balanced: 640_000, high: 1_100_000 };
+  expect(initial.frames).toBe(1);
+  expect(initial.pixelCount).toBeGreaterThan(320 * 240);
+  expect(initial.pixelCount).toBeLessThanOrEqual(qualityCaps[initial.quality]);
+
+  await page.evaluate(() => {
+    for (let index = 0; index < 8; index += 1) {
+      window.dispatchEvent(new CustomEvent('taic:motion-state'));
+      window.scrollTo(0, index * 20);
+    }
+  });
+  await page.waitForTimeout(160);
+
+  const frozen = await page.evaluate(() => window.__TAIC_CINEMATIC__.getSnapshot());
+  expect(frozen.frames).toBe(initial.frames);
+
+  await page.setViewportSize({ width: 360, height: 240 });
+  await page.waitForTimeout(120);
+  const resized = await page.evaluate(() => window.__TAIC_CINEMATIC__.getSnapshot());
+  expect(resized.frames).toBeGreaterThan(initial.frames);
+  expect(resized.frames - initial.frames).toBeLessThanOrEqual(2);
+  expect(resized.pixelCount).toBeLessThanOrEqual(qualityCaps[resized.quality]);
+
+  await context.close();
+});
+
+test('uses WebGL1 when WebGL2 is unavailable and caps framebuffer work', async ({ page }) => {
+  await page.addInitScript(() => {
+    const originalGetContext = HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.getContext = function getContext(type, ...args) {
+      if (type === 'webgl2') {
+        return null;
+      }
+      return originalGetContext.call(this, type, ...args);
+    };
+  });
+
+  await page.setViewportSize({ width: 1728, height: 995 });
+  await page.goto('/');
+  await expect(page.locator('html')).toHaveAttribute('data-gpu', 'ready');
+  await expect(page.locator('html')).toHaveAttribute('data-renderer', 'webgl1');
+
+  const snapshot = await page.evaluate(() => window.__TAIC_CINEMATIC__.getSnapshot());
+  expect(snapshot.pixelCount).toBeLessThanOrEqual(1_100_000);
+});
+
+test('keeps explicit low-power profiles below the adaptive promotion ladder', async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, 'connection', {
+      configurable: true,
+      value: { saveData: true },
+    });
+  });
+
+  await page.goto('/');
+  await expect(page.locator('html')).toHaveAttribute('data-gpu', 'ready');
+  const snapshot = await page.evaluate(() => window.__TAIC_CINEMATIC__.getSnapshot());
+  expect(snapshot.quality).toBe('low');
+  expect(snapshot.qualityCeiling).toBe('low');
+  expect(snapshot.pixelCount).toBeLessThanOrEqual(320_000);
+});
+
+test('retries with WebGL1 when WebGL2 shader initialization fails', async ({
+  page,
+  browserName,
+}) => {
+  test.skip(browserName !== 'chromium', 'Chromium provides a reliable WebGL2 test surface');
+  await page.addInitScript(() => {
+    const prototype = window.WebGL2RenderingContext?.prototype;
+    if (!prototype) {
+      return;
+    }
+    const original = prototype.getShaderParameter;
+    prototype.getShaderParameter = function getShaderParameter(shader, parameter) {
+      if (parameter === this.COMPILE_STATUS) {
+        return false;
+      }
+      return original.call(this, shader, parameter);
+    };
+  });
+
+  await page.goto('/');
+  await expect(page.locator('html')).toHaveAttribute('data-gpu', 'ready');
+  await expect(page.locator('html')).toHaveAttribute('data-renderer', 'webgl1');
+  const snapshot = await page.evaluate(() => window.__TAIC_CINEMATIC__.getSnapshot());
+  expect(snapshot.frames).toBeGreaterThan(0);
+});
+
+test('retries with WebGL1 when the first WebGL2 draw reports an error', async ({
+  page,
+  browserName,
+}) => {
+  test.skip(browserName !== 'chromium', 'Chromium provides a reliable WebGL2 test surface');
+  await page.addInitScript(() => {
+    const prototype = window.WebGL2RenderingContext?.prototype;
+    if (!prototype) {
+      return;
+    }
+    const original = prototype.getError;
+    let injectedFailure = false;
+    prototype.getError = function getError() {
+      if (!injectedFailure) {
+        injectedFailure = true;
+        return this.INVALID_OPERATION;
+      }
+      return original.call(this);
+    };
+  });
+
+  await page.goto('/');
+  await expect(page.locator('html')).toHaveAttribute('data-gpu', 'ready');
+  await expect(page.locator('html')).toHaveAttribute('data-renderer', 'webgl1');
+  const snapshot = await page.evaluate(() => window.__TAIC_CINEMATIC__.getSnapshot());
+  expect(snapshot.frames).toBeGreaterThan(1);
+});
+
+test('resumes exactly one cinematic loop after a BFCache-style restore', async ({ page }) => {
+  await page.goto('/');
+  const before = await page.evaluate(() => window.__TAIC_CINEMATIC__.getSnapshot().frames);
+
+  await page.evaluate(() => {
+    window.dispatchEvent(new PageTransitionEvent('pagehide', { persisted: true }));
+  });
+  await expect(page.locator('html')).toHaveAttribute('data-render-state', 'paused');
+
+  await page.evaluate(() => {
+    window.dispatchEvent(new PageTransitionEvent('pageshow', { persisted: true }));
+  });
+  await expect(page.locator('html')).toHaveAttribute('data-render-state', 'running');
+  await page.waitForTimeout(180);
+
+  const after = await page.evaluate(() => window.__TAIC_CINEMATIC__.getSnapshot().frames);
+  expect(after).toBeGreaterThan(before);
+  expect(after - before).toBeLessThan(30);
 });
 
 test('falls back gracefully when WebGL is unavailable', async ({ page }) => {
   await page.addInitScript(() => {
     const originalGetContext = HTMLCanvasElement.prototype.getContext;
     HTMLCanvasElement.prototype.getContext = function getContext(type, ...args) {
-      if (type === 'webgl' || type === 'experimental-webgl') {
+      if (type === 'webgl2' || type === 'webgl' || type === 'experimental-webgl') {
         return null;
       }
       return originalGetContext.call(this, type, ...args);
@@ -194,6 +454,7 @@ test('loads the landing page and whitepaper without client errors', async ({ pag
 test('publishes the complete thesis and keeps the accountable founder', async ({ page }) => {
   await page.goto('/thesis/');
 
+  await expect(page.locator('script[src*="site.js"]')).toHaveCount(0);
   await expect(
     page.getByRole('heading', {
       level: 1,

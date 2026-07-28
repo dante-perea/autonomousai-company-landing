@@ -2,7 +2,7 @@
 
 The public home of [autonomousai.company](https://autonomousai.company).
 
-The root landing page is a concise introduction to the company. The complete founder thesis is published as a whitepaper at `/thesis/`. The signature procedural WebGL field is rendered locally in the visitor’s browser and degrades gracefully when WebGL or continuous motion is unavailable.
+The root landing page is a concise introduction to the company. The complete founder thesis is published as a whitepaper at `/thesis/`. Its cinematic proof engine uses one GSAP-controlled narrative state across semantic DOM, SVG, and a custom WebGL2 field, with WebGL1 and composed CSS fallbacks.
 
 ## Development
 
@@ -19,7 +19,7 @@ Open the local URL Vite prints. The root page is `public/index.html`; the whitep
 npm run verify
 ```
 
-This runs static contract tests, builds the deployable `dist/` folder, and checks both the landing page and whitepaper at desktop and mobile sizes with Playwright.
+This runs static contract tests, builds the deployable `dist/` folder, and checks both the landing page and whitepaper in desktop Chromium, desktop WebKit, and mobile Safari profiles with Playwright and Axe.
 
 ## Deployment
 
