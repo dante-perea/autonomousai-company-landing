@@ -3,5 +3,8 @@ dist/
 playwright-report/
 test-results/
 .vercel/
+.env
+.env.local
+.env.*.local
 .DS_Store
 *.log
