@@ -13,32 +13,49 @@ await rm(output, { recursive: true, force: true });
 await mkdir(output, { recursive: true });
 await cp(source, output, { recursive: true });
 
-async function buildClient(outDir) {
+async function buildSite(outDir) {
   await build({
     configFile: false,
     publicDir: false,
     logLevel: 'warn',
-    root: source,
     build: {
       emptyOutDir: false,
       outDir,
       minify: 'esbuild',
+      lib: {
+        entry: resolve(source, 'site.js'),
+        formats: ['es'],
+        fileName: () => 'site.js',
+      },
       rollupOptions: {
-        input: {
-          site: resolve(source, 'site.js'),
-          operator: resolve(source, 'galt/operator.js'),
-        },
         output: {
-          entryFileNames: (chunk) =>
-            chunk.name === 'operator' ? 'galt/operator.js' : 'site.js',
-          chunkFileNames: 'assets/[name]-[hash].js',
+          entryFileNames: 'site.js',
         },
       },
     },
   });
 }
 
-await buildClient(output);
+async function buildOperator(outDir) {
+  await build({
+    configFile: false,
+    publicDir: false,
+    logLevel: 'warn',
+    build: {
+      emptyOutDir: false,
+      outDir,
+      minify: 'esbuild',
+      lib: {
+        entry: resolve(source, 'galt/operator.js'),
+        formats: ['es'],
+        fileName: () => 'galt/operator.js',
+      },
+    },
+  });
+}
+
+await buildSite(output);
+await buildOperator(output);
 
 await mkdir(resolve(output, 'server'), { recursive: true });
 await bundle({
@@ -53,4 +70,5 @@ await bundle({
 
 await mkdir(clientOutput, { recursive: true });
 await cp(source, clientOutput, { recursive: true });
-await buildClient(clientOutput);
+await buildSite(clientOutput);
+await buildOperator(clientOutput);
