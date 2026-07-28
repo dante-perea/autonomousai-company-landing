@@ -1,21 +1,18 @@
 import { defineConfig, devices } from '@playwright/test';
 
-const previewPort = process.env.TAIC_OPERATOR_PREVIEW_PORT || '42731';
-const previewUrl = `http://127.0.0.1:${previewPort}`;
-
 export default defineConfig({
   testDir: './tests',
   testMatch: '**/*.spec.mjs',
   workers: 1,
   webServer: {
-    command: `npm run preview -- --port ${previewPort}`,
-    url: previewUrl,
-    reuseExistingServer: false,
+    command: 'npm run preview -- --port 4173',
+    url: 'http://127.0.0.1:4173',
+    reuseExistingServer: !process.env.CI,
     stdout: 'pipe',
     stderr: 'pipe',
   },
   use: {
-    baseURL: previewUrl,
+    baseURL: 'http://127.0.0.1:4173',
     trace: 'on-first-retry',
   },
   projects: [

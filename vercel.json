@@ -1,17 +1,5 @@
 {
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "installCommand": "npm install",
-  "redirects": [
-    {
-      "source": "/galt",
-      "destination": "https://operator.autonomousai.company/galt/",
-      "permanent": false
-    },
-    {
-      "source": "/operator",
-      "destination": "https://operator.autonomousai.company/galt/",
-      "permanent": false
-    }
-  ]
+  "installCommand": "npm install"
 }
