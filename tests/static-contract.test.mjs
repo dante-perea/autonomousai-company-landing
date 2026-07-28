@@ -1,6 +1,5 @@
 import assert from 'node:assert/strict';
 import { readFile, stat } from 'node:fs/promises';
-import { join } from 'node:path';
 import { test } from 'node:test';
 
 const root = new URL('..', import.meta.url);
@@ -14,35 +13,65 @@ async function fileSize(path) {
   return (await stat(new URL(path, publicDir))).size;
 }
 
-test('ships the design handoff as the root static page', async () => {
+async function pngDimensions(path) {
+  const image = await readFile(new URL(path, publicDir));
+  assert.equal(image.subarray(1, 4).toString('ascii'), 'PNG');
+  return {
+    width: image.readUInt32BE(16),
+    height: image.readUInt32BE(20),
+  };
+}
+
+test('ships Dante Perea’s founding thesis as the root page', async () => {
   const html = await fileText('index.html');
 
-  assert.match(html, /<script src="\.\/support\.js"><\/script>/);
-  assert.match(html, /<canvas ref="\{\{ glRef \}\}"/);
-  assert.match(html, /<canvas ref="\{\{ swarmRef \}\}"/);
-  assert.match(html, /Software has<br>been/);
-  assert.match(html, /The singularity is here/);
-  assert.match(html, /The agentic web is live\./);
-  assert.match(html, /Intelligence is now/);
-  assert.match(html, /Signal received\. Welcome to the singularity\./);
-  assert.match(html, /class Component extends DCLogic/);
+  assert.match(html, /From companies with fewer people/i);
+  assert.match(html, /to one-person companies/i);
+  assert.match(html, /zero standing employees/i);
+  assert.match(html, /Software has been solved\./);
+  assert.match(html, /applications/i);
+  assert.match(html, /The next frontier is verification\./);
+  assert.match(html, /zero-people contract research organizations/i);
+  assert.match(html, /Zero people describes the direction, not the objective\./);
+  assert.match(html, /which valuable loops can we close first\?/i);
+  assert.match(html, /execution-validation loop/i);
 });
 
-test('keeps all handoff runtime and brand assets local', async () => {
+test('keeps supporting claims connected to primary sources', async () => {
   const html = await fileText('index.html');
-  const support = await fileText('support.js');
 
-  assert.match(html, /src="logo-mark\.svg"/);
-  assert.match(html, /src="wordmark-white\.png"/);
-  assert.match(support, /react@18\.3\.1\/umd\/react\.production\.min\.js/);
-  assert.match(support, /react-dom@18\.3\.1\/umd\/react-dom\.production\.min\.js/);
+  assert.match(html, /youtube\.com\/watch\?v=Vv3CEAS_w34/);
+  assert.match(html, /blog\.samaltman\.com\/the-gentle-singularity/);
+  assert.match(html, /x\.com\/elonmusk\/status\/1893810875875889507/);
+  assert.match(html, /nav\.al\/rich/);
+  assert.match(html, /anthropic\.com\/news\/claude-science-ai-workbench/);
+  assert.match(html, /periodic\.com/);
+});
+
+test('uses a semantic, local-first landing page without the handoff runtime', async () => {
+  const html = await fileText('index.html');
+  const css = await fileText('styles.css');
+  const js = await fileText('site.js');
+
+  assert.match(html, /<html lang="en">/);
+  assert.match(html, /<title>The Autonomous AI Company \| Founding Thesis<\/title>/);
+  assert.match(html, /<link rel="stylesheet" href="\.\/styles\.css">/);
+  assert.match(html, /<script src="\.\/site\.js" defer><\/script>/);
+  assert.match(html, /<main id="main-content">/);
+  assert.match(html, /<h1 id="hero-title">/);
+  assert.doesNotMatch(html, /support\.js/);
+  assert.doesNotMatch(html, /class Component extends DCLogic/);
+  assert.doesNotMatch(html, /this field is live inference/i);
+  assert.match(css, /prefers-reduced-motion/);
+  assert.match(css, /:focus-visible/);
+  assert.match(css, /oklch\(/);
+  assert.match(js, /IntersectionObserver/);
+});
+
+test('keeps the brand assets and removes the obsolete handoff runtime', async () => {
   assert.ok((await fileSize('logo-mark.svg')) > 1000);
   assert.ok((await fileSize('wordmark-white.png')) > 10000);
-});
-
-test('keeps the original handoff available for traceability', async () => {
-  const original = await fileText('manifesto-singularity.dc.html');
-  const rootPage = await fileText('index.html');
-
-  assert.equal(rootPage, original);
+  assert.deepEqual(await pngDimensions('og-card.png'), { width: 1200, height: 630 });
+  await assert.rejects(fileSize('manifesto-singularity.dc.html'), /ENOENT/);
+  await assert.rejects(fileSize('support.js'), /ENOENT/);
 });
