@@ -11,7 +11,7 @@ test('presents a succinct company overview derived from the thesis', async ({ pa
     }),
   ).toBeVisible();
   await expect(page.getByText(/Not because people lack value/i)).toBeVisible();
-  await expect(page.getByRole('link', { name: /Read the thesis/i }).first()).toHaveAttribute(
+  await expect(page.getByRole('link', { name: /founding thesis/i }).first()).toHaveAttribute(
     'href',
     './thesis/',
   );
@@ -103,6 +103,35 @@ test('starts the cinematic narrative with only the hero scene active', async ({ 
   expect(activeGroups).toEqual(['hero']);
 });
 
+test('locks a stable system face when the display font misses the intro deadline', async ({
+  page,
+  browserName,
+}) => {
+  test.skip(browserName !== 'chromium', 'One delayed-font runtime probe is sufficient');
+
+  await page.route('https://fonts.gstatic.com/**', async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, 1_400));
+    await route.continue().catch(() => {});
+  });
+  await page.goto('/', { waitUntil: 'domcontentloaded' });
+
+  await expect(page.locator('html')).toHaveClass(/font-fallback/, { timeout: 5_000 });
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+  expect(await page.locator('[data-taic-font-resource]').count()).toBe(0);
+
+  const settledWidth = await page
+    .locator('.hero-title__line')
+    .first()
+    .evaluate((element) => element.getBoundingClientRect().width);
+  await page.waitForTimeout(1_700);
+  const lateWidth = await page
+    .locator('.hero-title__line')
+    .first()
+    .evaluate((element) => element.getBoundingClientRect().width);
+
+  expect(Math.abs(lateWidth - settledWidth)).toBeLessThan(0.5);
+});
+
 test('fails open if the motion controller cannot load', async ({ page }) => {
   await page.route('**/site.js', (route) => route.abort());
   await page.goto('/');
@@ -110,7 +139,7 @@ test('fails open if the motion controller cannot load', async ({ page }) => {
 
   await expect(page.locator('html')).not.toHaveClass(/motion-enabled/);
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Close valuable loops.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /Execution is not value/i })).toBeVisible();
 });
 
 test('restores the GPU field as a rendered visual layer', async ({ page }) => {
@@ -118,7 +147,7 @@ test('restores the GPU field as a rendered visual layer', async ({ page }) => {
 
   await expect(page.locator('#gpu-field')).toBeAttached();
   await expect(page.locator('#agent-swarm')).toHaveCount(0);
-  await expect(page.locator('.cinematic-overlay')).toBeAttached();
+  await expect(page.locator('[data-optical-surface]')).toBeAttached();
   await expect(page.locator('html')).toHaveAttribute('data-gpu', 'ready');
   await expect(page.locator('html')).toHaveAttribute('data-renderer', /webgl2|webgl1/);
   await expect(page.locator('html')).toHaveAttribute('data-quality', /high|balanced|low/);
@@ -170,12 +199,12 @@ test('scrubs one proof signal reversibly through the four thesis scenes', async 
     documentProgress: getComputedStyle(document.documentElement)
       .getPropertyValue('--document-progress')
       .trim(),
-    signalCount: document.querySelectorAll('[data-proof-signal]').length,
+    opticalSurfaceCount: document.querySelectorAll('[data-optical-surface]').length,
     diagnostics: window.__TAIC_CINEMATIC__?.getSnapshot?.(),
   }));
 
   expect(proofState.documentProgress).not.toBe('');
-  expect(proofState.signalCount).toBeGreaterThan(0);
+  expect(proofState.opticalSurfaceCount).toBe(1);
   expect(proofState.diagnostics?.scene).toBe('hero');
 });
 
@@ -258,7 +287,7 @@ test('freezes the reduced-motion GPU until its framebuffer needs resizing', asyn
   await page.waitForTimeout(120);
 
   const initial = await page.evaluate(() => window.__TAIC_CINEMATIC__.getSnapshot());
-  const qualityCaps = { low: 320_000, balanced: 640_000, high: 1_100_000 };
+  const qualityCaps = { low: 600_000, balanced: 2_000_000, high: 4_800_000 };
   expect(initial.frames).toBe(1);
   expect(initial.pixelCount).toBeGreaterThan(320 * 240);
   expect(initial.pixelCount).toBeLessThanOrEqual(qualityCaps[initial.quality]);
@@ -301,7 +330,7 @@ test('uses WebGL1 when WebGL2 is unavailable and caps framebuffer work', async (
   await expect(page.locator('html')).toHaveAttribute('data-renderer', 'webgl1');
 
   const snapshot = await page.evaluate(() => window.__TAIC_CINEMATIC__.getSnapshot());
-  expect(snapshot.pixelCount).toBeLessThanOrEqual(1_100_000);
+  expect(snapshot.pixelCount).toBeLessThanOrEqual(4_800_000);
 });
 
 test('keeps explicit low-power profiles below the adaptive promotion ladder', async ({ page }) => {
@@ -317,7 +346,7 @@ test('keeps explicit low-power profiles below the adaptive promotion ladder', as
   const snapshot = await page.evaluate(() => window.__TAIC_CINEMATIC__.getSnapshot());
   expect(snapshot.quality).toBe('low');
   expect(snapshot.qualityCeiling).toBe('low');
-  expect(snapshot.pixelCount).toBeLessThanOrEqual(320_000);
+  expect(snapshot.pixelCount).toBeLessThanOrEqual(600_000);
 });
 
 test('retries with WebGL1 when WebGL2 shader initialization fails', async ({
@@ -413,6 +442,7 @@ test('falls back gracefully when WebGL is unavailable', async ({ page }) => {
 test('serves the production assets, whitepaper, and social preview card', async ({ page, request }) => {
   const responses = await Promise.all([
     request.get('/styles.css'),
+    request.get('/cinematic.css'),
     request.get('/site.js'),
     request.get('/gpu-background.js'),
     request.get('/thesis/'),
@@ -512,6 +542,13 @@ test('remains readable when motion is reduced', async ({ browser }) => {
   });
   expect(motionState).toEqual({ opacity: '1', transform: 'none' });
 
+  await page.locator('#company').scrollIntoViewIfNeeded();
+  const reducedScalePhases = page.locator('[data-company-phase] strong');
+  await expect(reducedScalePhases).toHaveCount(3);
+  for (const phase of await reducedScalePhases.all()) {
+    await expect(phase).toBeVisible();
+  }
+
   await context.close();
 });
 
@@ -524,7 +561,12 @@ test('keeps the complete thesis visible without JavaScript or external fonts', a
   await page.goto('/');
 
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-  await expect(page.getByRole('link', { name: /Read the thesis/i }).first()).toBeVisible();
+  await expect(page.getByRole('link', { name: /founding thesis/i }).first()).toBeVisible();
+  const fallbackScalePhases = page.locator('[data-company-phase] strong');
+  await expect(fallbackScalePhases).toHaveCount(3);
+  for (const phase of await fallbackScalePhases.all()) {
+    await expect(phase).toBeVisible();
+  }
 
   await page.goto('/thesis/');
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible();

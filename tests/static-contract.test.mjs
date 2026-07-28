@@ -32,13 +32,14 @@ test('ships a concise thesis-led company landing page', async () => {
     .split(/\s+/)
     .filter((word) => word && !/^\d+$/.test(word));
 
-  assert.match(html, /Companies with fewer people\./i);
-  assert.match(html, /One-person companies\./i);
+  assert.match(html, /Fewer people/i);
+  assert.match(html, /one person/i);
   assert.match(html, /Zero standing employees\./i);
   assert.match(html, /Not because people lack value/i);
   assert.match(html, /Work has always been a proxy for value creation/i);
   assert.match(html, /href="\.\/thesis\/"/);
-  assert.match(html, /Close valuable loops\./);
+  assert.match(html, /Execution is not value\./);
+  assert.match(html, /Verification makes it value\./);
   assert.match(html, /Software has been solved\./);
   assert.match(html, /Verification is next\./);
   assert.match(html, /contract research organizations/i);
@@ -85,12 +86,17 @@ test('restores the local WebGL field without the obsolete handoff runtime', asyn
   assert.match(html, /<html[\s\S]*?lang="en"[^>]*>/);
   assert.match(html, /<title>The Autonomous AI Company<\/title>/);
   assert.match(html, /<link rel="stylesheet" href="\.\/styles\.css">/);
+  assert.match(html, /<link rel="stylesheet" href="\.\/cinematic\.css">/);
   assert.match(html, /<script src="\.\/site\.js" type="module"><\/script>/);
   assert.match(html, /<script src="\.\/gpu-background\.js" defer><\/script>/);
+  assert.match(html, /rel="preload"[\s\S]*?monasans/);
+  assert.match(html, /rel="preload"[\s\S]*?martianmono/);
   assert.match(html, /<main id="main-content">/);
   assert.match(html, /id="gpu-field"/);
-  assert.match(html, /class="cinematic-overlay"/);
-  assert.match(html, /data-proof-signal/);
+  assert.match(html, /class="ambient-field optical-stage"/);
+  assert.match(html, /data-optical-surface/);
+  assert.doesNotMatch(html, /class="cinematic-overlay"/);
+  assert.doesNotMatch(html, /data-proof-signal/);
   assert.doesNotMatch(html, /id="agent-swarm"/);
   assert.doesNotMatch(html, /support\.js/);
   assert.doesNotMatch(html, /class Component extends DCLogic/);
@@ -117,6 +123,11 @@ test('restores the local WebGL field without the obsolete handoff runtime', asyn
   assert.match(gpu, /webglcontextlost/);
   assert.match(gpu, /webglcontextrestored/);
   assert.match(gpu, /data-renderer|dataset\.renderer/);
+  assert.match(gpu, /uniform float u_loop_progress/);
+  assert.match(gpu, /uniform float u_frontier_progress/);
+  assert.match(gpu, /uniform float u_company_progress/);
+  assert.doesNotMatch(gpu, /uniform float u_progress;/);
+  assert.match(gpu, /performanceFrozen/);
   assert.match(js, /--scene-position/);
   assert.match(js, /--document-progress/);
   assert.match(js, /addEventListener\(['"]change['"]/);
