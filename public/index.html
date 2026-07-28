@@ -11,12 +11,15 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#090a10">
-  <meta name="description" content="The Autonomous AI Company explores how valuable execution-validation loops move from AI-assisted, to automated, to autonomous.">
+  <meta name="theme-color" content="#08090c">
+  <meta
+    name="description"
+    content="The Autonomous AI Company explores how valuable execution-validation loops move from AI-assisted, to automated, to autonomous."
+  >
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://autonomousai.company/">
   <meta property="og:title" content="The Autonomous AI Company">
-  <meta property="og:description" content="From companies with fewer people to companies with zero standing employees.">
+  <meta property="og:description" content="Zero standing employees. One accountable founder.">
   <meta property="og:image" content="https://autonomousai.company/og-card.png">
   <meta property="og:image:secure_url" content="https://autonomousai.company/og-card.png">
   <meta property="og:image:type" content="image/png">
@@ -30,7 +33,28 @@
   <title>The Autonomous AI Company</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Azeret+Mono:wght@400;500;600&family=Saira:wght@400;500;600;700&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <link
+    data-taic-font-resource
+    rel="preload"
+    href="https://fonts.gstatic.com/s/monasans/v4/o-0IIpQmx24alC5A4PNr5TRASf6M7Q.woff2"
+    as="font"
+    type="font/woff2"
+    crossorigin
+  >
+  <link
+    data-taic-font-resource
+    rel="preload"
+    href="https://fonts.gstatic.com/s/martianmono/v6/2V0PKIcADoYhV6w87xrTKjs4CYElh_VS9YA4TlTnaTq9wXulPFk.woff2"
+    as="font"
+    type="font/woff2"
+    crossorigin
+  >
+  <link
+    id="cinematic-fonts"
+    data-taic-font-resource
+    href="https://fonts.googleapis.com/css2?family=Mona+Sans:wdth,wght@75..125,300..800&family=Martian+Mono:wght@400;500&display=swap"
+    rel="stylesheet"
+  >
   <script>
     if (!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
       document.documentElement.classList.add('motion-enabled');
@@ -40,6 +64,7 @@
     }
   </script>
   <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./cinematic.css">
   <script src="./site.js" type="module"></script>
   <script src="./gpu-background.js" defer></script>
   <script type="application/ld+json">
@@ -60,58 +85,11 @@
 <body class="landing-page">
   <a class="skip-link" href="#main-content">Skip to the company</a>
 
-  <div class="ambient-field" aria-hidden="true">
+  <div class="ambient-field optical-stage" data-optical-surface aria-hidden="true">
     <canvas id="gpu-field"></canvas>
-    <div class="field-veil"></div>
-    <svg class="cinematic-overlay" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
-      <defs>
-        <linearGradient id="proof-gradient" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stop-color="#9b78ff"></stop>
-          <stop offset=".52" stop-color="#d8dcff"></stop>
-          <stop offset="1" stop-color="#17e5c2"></stop>
-        </linearGradient>
-        <radialGradient id="anchor-gradient">
-          <stop offset="0" stop-color="#ffd272"></stop>
-          <stop offset=".28" stop-color="#f4a83b" stop-opacity=".82"></stop>
-          <stop offset="1" stop-color="#f4a83b" stop-opacity="0"></stop>
-        </radialGradient>
-        <filter id="proof-glow" x="-100%" y="-100%" width="300%" height="300%">
-          <feGaussianBlur stdDeviation="5" result="blur"></feGaussianBlur>
-          <feMerge>
-            <feMergeNode in="blur"></feMergeNode>
-            <feMergeNode in="SourceGraphic"></feMergeNode>
-          </feMerge>
-        </filter>
-      </defs>
-
-      <g class="proof-layer proof-layer--hero">
-        <path
-          class="proof-trace proof-trace--dim"
-          d="M140 36 C284 48 330 188 520 188 S760 94 924 190 1025 353 1138 382"
-        ></path>
-        <path
-          class="proof-trace proof-trace--live"
-          data-proof-signal
-          pathLength="1"
-          d="M140 36 C284 48 330 188 520 188 S760 94 924 190 1025 353 1138 382"
-        ></path>
-        <circle class="proof-circuit proof-circuit--outer" cx="1180" cy="420" r="180"></circle>
-        <circle class="proof-circuit proof-circuit--inner" cx="1180" cy="420" r="118"></circle>
-        <path
-          class="proof-seal"
-          data-proof-signal
-          pathLength="1"
-          d="M1295 282 C1365 345 1378 445 1323 520"
-        ></path>
-      </g>
-
-      <g class="founder-anchor" data-founder-anchor>
-        <circle class="founder-anchor__glow" cx="1440" cy="748" r="96"></circle>
-        <circle class="founder-anchor__boundary" cx="1440" cy="748" r="34"></circle>
-        <circle class="founder-anchor__core" cx="1440" cy="748" r="5"></circle>
-      </g>
-    </svg>
-    <div class="field-grain"></div>
+    <div class="optical-stage__halation"></div>
+    <div class="optical-stage__vignette"></div>
+    <div class="optical-stage__grain"></div>
   </div>
 
   <header class="site-header">
@@ -121,245 +99,168 @@
     </a>
 
     <nav class="site-nav" aria-label="Primary navigation">
-      <a href="#model">The loop</a>
+      <a href="#model">Verification</a>
       <a href="#frontiers">Frontiers</a>
-      <a href="#company">The company</a>
+      <a href="#company">Scale</a>
     </nav>
 
     <a class="header-action" href="./thesis/">
-      <span class="header-action__long">Read the thesis</span>
+      <span class="header-action__long">Founding thesis</span>
       <span class="header-action__short">Thesis</span>
+      <span aria-hidden="true">↗</span>
     </a>
   </header>
 
   <main id="main-content">
     <section class="hero" id="top" data-field-state="hero" aria-labelledby="hero-title">
       <div class="hero__inner" data-motion-group="hero">
-        <p class="eyebrow" data-motion-item style="--step: 0">A founder-led, agent-operated company</p>
+        <p class="hero__progression" data-motion-item>
+          <span data-progress-step>Fewer people</span>
+          <span class="hero__arrow" aria-hidden="true">→</span>
+          <span data-progress-step>one person</span>
+          <span class="hero__arrow" aria-hidden="true">→</span>
+        </p>
+
         <h1
-          class="hero-sequence"
+          class="hero-title"
           id="hero-title"
           aria-label="From companies with fewer people, to one-person companies, to companies with zero standing employees."
         >
-          <span class="hero-stage hero-stage--fewer" data-motion-item style="--step: 1" aria-hidden="true">
-            <span class="hero-stage__index">01</span>
-            <span class="hero-stage__copy">Companies with fewer people.</span>
-          </span>
-          <span class="hero-stage hero-stage--one" data-motion-item style="--step: 2" aria-hidden="true">
-            <span class="hero-stage__index">02</span>
-            <span class="hero-stage__copy">One-person companies.</span>
-          </span>
-          <span class="hero-stage hero-stage--zero" data-motion-item style="--step: 3" aria-hidden="true">
-            <span class="hero-stage__index">03</span>
-            <span class="hero-stage__copy">Zero standing employees.</span>
-          </span>
+          <span class="hero-title__line" data-motion-item aria-hidden="true">Zero standing</span>
+          <span class="hero-title__line hero-title__line--final" data-motion-item aria-hidden="true">employees.</span>
         </h1>
 
-        <div class="hero__statement" data-motion-item style="--step: 4">
+        <div class="hero__statement" data-motion-item>
           <p class="hero__lead">
             Not because people lack value. Work has always been a proxy for value creation. AI changes that mechanism.
           </p>
           <p class="hero__guardrail">
             Zero people is the direction. Value creation is the objective.
           </p>
-          <a class="button button--primary" href="./thesis/">Read the thesis</a>
         </div>
+
+        <a class="text-action" href="./thesis/" data-motion-item>
+          Read the founding thesis <span aria-hidden="true">↗</span>
+        </a>
       </div>
 
-      <a class="scroll-cue" href="#model">The loop <span aria-hidden="true">↓</span></a>
+      <a class="scroll-cue" href="#model">
+        <span>Continue</span>
+        <span class="scroll-cue__line" aria-hidden="true"></span>
+      </a>
     </section>
 
     <section class="mechanism-section" id="model" data-field-state="mechanism" aria-labelledby="mechanism-title">
-      <div class="section-frame" data-motion-group="loop">
-        <div class="section-heading">
-          <p class="section-number" data-motion-item style="--step: 0">01 · The model</p>
-          <h2 id="mechanism-title" data-motion-item style="--step: 1">Close valuable loops.</h2>
-        </div>
+      <div class="scene-frame scene-frame--loop" data-motion-group="loop">
+        <p class="scene-index" data-motion-item>01 / Verification</p>
+        <h2 id="mechanism-title" data-motion-item>
+          Execution is not value.
+          <strong>Verification makes it value.</strong>
+        </h2>
 
-        <div class="value-loop-shell">
-          <svg class="value-loop__circuit" viewBox="0 0 1200 280" aria-hidden="true">
-            <path
-              class="value-loop__track"
-              d="M92 140 C92 62 210 36 370 36 H830 C990 36 1108 62 1108 140 S990 244 830 244 H370 C210 244 92 218 92 140Z"
-            ></path>
-            <path
-              class="value-loop__proof"
-              id="value-proof-path"
-              data-proof-signal
-              pathLength="1"
-              d="M92 140 C92 62 210 36 370 36 H830 C990 36 1108 62 1108 140 S990 244 830 244 H370 C210 244 92 218 92 140Z"
-            ></path>
-            <g class="value-loop__gate">
-              <path d="M812 12 V268"></path>
-              <path d="M838 12 V268"></path>
-            </g>
-            <circle class="value-loop__token" data-loop-token cx="92" cy="140" r="7"></circle>
-          </svg>
+        <ol class="loop-sequence" aria-label="Intention, execution, validation, value">
+          <li data-loop-phase="0" data-motion-item>
+            <span>01</span>
+            <strong>Intention</strong>
+          </li>
+          <li data-loop-phase="1" data-motion-item>
+            <span>02</span>
+            <strong>Execution</strong>
+          </li>
+          <li data-loop-phase="2" data-motion-item>
+            <span>03</span>
+            <strong>Validation</strong>
+          </li>
+          <li data-loop-phase="3" data-motion-item>
+            <span>04</span>
+            <strong>Value</strong>
+          </li>
+        </ol>
 
-          <ol class="value-loop" aria-label="Intention, execution, validation, value">
-            <li data-motion-item style="--step: 2; --node: 0">
-              <span>01</span>
-              <strong>Intention</strong>
-            </li>
-            <li data-motion-item style="--step: 3; --node: 1">
-              <span>02</span>
-              <strong>Execution</strong>
-            </li>
-            <li class="value-loop__validation" data-motion-item style="--step: 4; --node: 2">
-              <span>03</span>
-              <strong>Validation</strong>
-            </li>
-            <li class="value-loop__value" data-motion-item style="--step: 5; --node: 3">
-              <span>04</span>
-              <strong>Value</strong>
-            </li>
-          </ol>
-        </div>
-
-        <p class="mechanism-copy" data-motion-item style="--step: 6">
-          AI is collapsing the cost of turning intention into valuable output. Which valuable loop can we close first?
+        <p class="scene-copy" data-motion-item>
+          AI collapses the cost of turning intention into output. The first move is to close the execution-validation loop.
         </p>
       </div>
     </section>
 
     <section class="frontiers-section" id="frontiers" data-field-state="frontiers" aria-labelledby="frontiers-title">
-      <div class="section-frame" data-motion-group="frontiers">
-        <div class="section-heading section-heading--compact">
-          <p class="section-number" data-motion-item style="--step: 0">02</p>
-          <h2 id="frontiers-title" data-motion-item style="--step: 1">Two frontiers.</h2>
-        </div>
+      <div class="scene-frame scene-frame--frontiers" data-motion-group="frontiers">
+        <p class="scene-index" data-motion-item>02 / Two frontiers</p>
+        <h2 id="frontiers-title" data-motion-item>
+          Same intelligence.
+          <strong>Different cost of proof.</strong>
+        </h2>
 
-        <div class="frontier-row">
-          <svg class="frontier-proof" viewBox="0 0 1200 380" aria-hidden="true">
-            <defs>
-              <linearGradient id="frontier-gradient" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0" stop-color="#9b78ff"></stop>
-                <stop offset=".52" stop-color="#d8dcff"></stop>
-                <stop offset="1" stop-color="#17e5c2"></stop>
-              </linearGradient>
-              <filter id="frontier-glow" x="-100%" y="-100%" width="300%" height="300%">
-                <feGaussianBlur stdDeviation="4" result="blur"></feGaussianBlur>
-                <feMerge>
-                  <feMergeNode in="blur"></feMergeNode>
-                  <feMergeNode in="SourceGraphic"></feMergeNode>
-                </feMerge>
-              </filter>
-            </defs>
-            <path
-              class="frontier-proof__track"
-              d="M72 190 C238 190 332 70 490 190 S862 310 1128 190"
-            ></path>
-            <path
-              class="frontier-proof__live"
-              id="frontier-proof-path"
-              data-proof-signal
-              pathLength="1"
-              d="M72 190 C238 190 332 70 490 190 S862 310 1128 190"
-            ></path>
-            <g class="frontier-proof__gate">
-              <path d="M586 34 V346"></path>
-              <path d="M614 34 V346"></path>
-            </g>
-            <circle class="frontier-proof__token" data-frontier-token cx="72" cy="190" r="7"></circle>
-          </svg>
-
-          <article data-motion-item style="--step: 2">
-            <p class="frontier-label">Applications</p>
-            <div class="frontier-instrument frontier-instrument--applications" aria-hidden="true">
-              <i></i><i></i><i></i>
-            </div>
+        <div class="frontier-pair">
+          <article data-motion-item>
+            <p class="frontier-name">Applications</p>
             <h3>Software has been solved.</h3>
-            <p>
-              Engineering still matters. Workflows represented and verified in software can move toward autonomy.
-            </p>
+            <p>Digital loops make verification cheap enough to automate.</p>
           </article>
 
-          <article data-motion-item style="--step: 3">
-            <p class="frontier-label">Research</p>
-            <div class="frontier-instrument frontier-instrument--research" aria-hidden="true">
-              <i></i><i></i><i></i>
-            </div>
+          <article data-motion-item>
+            <p class="frontier-name">Research</p>
             <h3>Verification is next.</h3>
-            <p>
-              Make scientific verification cheaper, faster and increasingly autonomous.
-            </p>
+            <p>Physical loops still spend capital and time on every iteration.</p>
           </article>
-
-          <p class="frontier-proof__label" aria-hidden="true">Verification gate</p>
         </div>
       </div>
     </section>
 
     <section class="company-section" id="company" data-field-state="company" aria-labelledby="company-title">
-      <div class="section-frame company-frame" data-motion-group="company-path">
-        <div class="company-statement">
-          <p class="section-number" data-motion-item style="--step: 0">03 · The company</p>
-          <h2 id="company-title" data-motion-item style="--step: 1">My exploration function.</h2>
+      <div class="company-frame" data-motion-group="company-path">
+        <div class="company-frame__heading">
+          <p class="scene-index" data-motion-item>03 / Scale</p>
+          <h2 id="company-title" data-motion-item>My exploration function.</h2>
         </div>
 
-        <div class="scale-journey">
-          <div class="scale-system" aria-hidden="true">
-            <svg class="scale-system__rings" viewBox="0 0 360 360">
-              <circle class="scale-system__orbit scale-system__orbit--company" cx="180" cy="180" r="48"></circle>
-              <circle class="scale-system__orbit scale-system__orbit--cro" cx="180" cy="180" r="104"></circle>
-              <circle class="scale-system__orbit scale-system__orbit--lab" cx="180" cy="180" r="164"></circle>
-              <path class="scale-system__relay" d="M180 132 V16 M132 180 H16 M228 180 H344 M180 228 V344"></path>
-              <g class="scale-system__nodes">
-                <circle cx="180" cy="16" r="4"></circle>
-                <circle cx="16" cy="180" r="4"></circle>
-                <circle cx="344" cy="180" r="4"></circle>
-                <circle cx="180" cy="344" r="4"></circle>
-              </g>
-              <circle class="scale-system__core" cx="180" cy="180" r="7"></circle>
-            </svg>
-            <p>Operational scale <span data-scale-index>01</span></p>
-          </div>
+        <ol
+          class="scale-sequence"
+          aria-label="Zero-people company, zero-people contract research organization, zero-people lab"
+        >
+          <li data-company-phase="0" data-motion-item>
+            <span>Now</span>
+            <strong>Company</strong>
+          </li>
+          <li data-company-phase="1" data-motion-item>
+            <span>Next</span>
+            <strong>CRO</strong>
+          </li>
+          <li data-company-phase="2" data-motion-item>
+            <span>Frontier</span>
+            <strong>Lab</strong>
+          </li>
+        </ol>
 
-          <ol class="company-path" aria-label="Company, contract research organizations, lab">
-            <li data-company-phase="0" data-motion-item style="--step: 2">
-              <span>Now</span>
-              <strong>Zero-people company</strong>
-            </li>
-            <li data-company-phase="1" data-motion-item style="--step: 3">
-              <span>Next</span>
-              <strong>Zero-people contract research organizations</strong>
-            </li>
-            <li data-company-phase="2" data-motion-item style="--step: 4">
-              <span>Frontier</span>
-              <strong>Zero-people lab</strong>
-            </li>
-          </ol>
-        </div>
+        <p class="company-frame__copy" data-motion-item>
+          From a zero-people company, to zero-people contract research organizations, to a zero-people lab.
+        </p>
       </div>
 
       <div class="founder-boundary" data-motion-group="founder-boundary">
-        <p class="founder-boundary__label" data-motion-item style="--step: 0">
-          <span aria-hidden="true"></span>
-          Judgement / accountability
-        </p>
-        <p class="founder-boundary__statement" data-motion-item style="--step: 0">
-          Eventually, everything delegated.
-          <strong>Except judgement.</strong>
-        </p>
-
-        <div class="founder-boundary__detail" data-motion-item style="--step: 1">
-          <p>
+        <div class="founder-boundary__line" aria-hidden="true"></div>
+        <div class="founder-boundary__content">
+          <p class="founder-boundary__label" data-motion-item>Founder boundary</p>
+          <p class="founder-boundary__statement" data-motion-item>
+            Eventually, everything delegated.
+            <strong>Except judgement.</strong>
+          </p>
+          <p class="founder-boundary__detail" data-motion-item>
             The founder chooses outcomes, sets boundaries and remains accountable for irreversible decisions.
           </p>
-          <p class="first-move">
-            Close a valuable loop. Make verification cheap. Build distribution and feedback.
-          </p>
-          <a class="button button--primary" href="./thesis/">Read the full whitepaper</a>
+          <a class="text-action text-action--warm" href="./thesis/" data-motion-item>
+            Read the complete whitepaper <span aria-hidden="true">↗</span>
+          </a>
         </div>
       </div>
     </section>
   </main>
 
   <footer class="site-footer">
-    <div class="site-footer__brand">
+    <a class="site-footer__brand" href="#top">
       <img src="./logo-mark.svg" alt="">
       <span>The Autonomous AI Company</span>
-    </div>
+    </a>
     <p>Founder-led. Agent-operated. Accountable for outcomes.</p>
     <p>© 2026 Dante Perea</p>
   </footer>

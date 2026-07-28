@@ -11,3 +11,16 @@ for (const path of ['/', '/thesis/']) {
     expect(results.violations).toEqual([]);
   });
 }
+
+test('the animated verification state retains accessible contrast', async ({ page }) => {
+  await page.goto('/');
+  await page.locator('#model').scrollIntoViewIfNeeded();
+  await page.waitForTimeout(450);
+
+  const results = await new AxeBuilder({ page })
+    .include('.loop-sequence')
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
+    .analyze();
+
+  expect(results.violations).toEqual([]);
+});
